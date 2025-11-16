@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>智能蔬菜溯源系统 - 绿田农场</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans SC", "Segoe UI", Arial, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+  }
+
+  header {
+    text-align: center;
+    padding: 50px 20px 30px;
+    background: linear-gradient(135deg, #1f6feb, #0f54b6 60%, #1f6feb);
+    border-bottom: 5px solid #00c7e6;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 2px;
+  }
+  
+  header p {
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 10px;
+      font-size: 16px;
+  }
+
+  .container {
+    max-width: 950px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .card {
+    background: #161b22;
+    padding: 30px;
+    margin-bottom: 35px;
+    border-radius: 16px;
+    border: 1px solid #30363d;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+  }
+
+  .card h2 {
+    color: #00c7e6;
+    margin-top: 0;
+    border-bottom: 2px solid #30363d;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .card h2 i {
+      margin-right: 10px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .img-box {
+    width: 100%;
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    border: 3px solid #00c7e6;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .img-box::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-top-left-radius: 12px;
+      font-size: 14px;
+  }
+
+  .timeline {
+    border-left: 4px solid #00c7e6;
+    padding-left: 20px;
+  }
+
+  .timeline p {
+    margin: 20px 0;
+    position: relative;
+    font-size: 16px;
+  }
+  
+  .timeline p::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #00c7e6;
+      border: 3px solid #161b22;
+  }
+  
+  .timeline p i {
+      color: #1f6feb;
+      margin-right: 8px;
+  }
+  
+  .data-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+  }
+  
+  .progress-bar-container {
+      flex-grow: 1;
+      height: 8px;
+      background: #30363d;
+      border-radius: 4px;
+      margin: 0 15px;
+      overflow: hidden;
+  }
+  
+  .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #1f6feb, #00c7e6);
+      transition: width 1s;
+  }
+  
+  .data-value {
+      width: 80px;
+      text-align: right;
+      font-weight: bold;
+      color: #00c7e6;
+  }
+  
+  .ai-suggestion {
+      padding: 15px;
+      background: #1f6feb30;
+      border-left: 4px solid #1f6feb;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-style: italic;
+  }
+
+  footer {
+    text-align: center;
+    margin: 50px 0 30px;
+    color: #8b949e;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>智能蔬菜全链路溯源系统</h1>
+  <p>数据驱动 | 透明化管理 | 食材安全保障</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2><i class="fas fa-seedling"></i> 作物信息</h2>
+    <div class="grid-2">
+        <div>
+            <p><strong>农场：</strong>绿田智慧农场</p>
+            <p><strong>作物：</strong>生菜（示例）</p>
+            <p><strong>地块编号：</strong><span style="color:#00c7e6;">PLOT-2025-11-A12</span></p>
+        </div>
+        <div>
+            <p><strong>采摘时间：</strong>2025-11-16 07:30</p>
+            <p><strong>目标：</strong><span style="color:#1f6feb; font-weight:bold;">采摘到上桌 ≤ 12 小时</span></p>
+            <p><strong>状态：</strong><span style="color:#a3ff00; font-weight:bold;">运输中 (已用时 7h)</span></p>
+        </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-camera"></i> 生长过程（AI 摄像头自动记录）</h2>
+    <div class="grid-2">
+      <div class="img-box" data-label="第15天：幼苗期" style="background-image:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=60');"></div>
+      <div class="img-box" data-label="第28天：快速生长期" style="background-image:url('https://images.unsplash.com/photo-1506801310323-534be5e7f1f5?auto=format&fit=crop&w=800&q=60');"></div>
+    </div>
+    <p style="margin-top:20px; color:#8b949e;">以上图片为 AI 自动拍摄示例，记录了作物的关键生长阶段。</p>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-chart-line"></i> 传感器监测数据（实时）</h2>
+    
+    <div class="data-item">
+        <span><i class="fas fa-tint"></i> 土壤湿度</span>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 62%;"></div>
+        </div>
+        <span class="data-value">62%</span>
+    </div>
+
+    <div class="data-item">
+        <span><i class="fas fa-thermometer-half"></i> 土壤温度</span>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 34%; background: linear-gradient(90deg, #ff9900, #ff5500);"></div>
+        </div>
+        <span class="data-value">18.4°C</span>
+    </div>
+    
+    <div class="data-item">
+        <span><i class="fas fa-flask"></i> 肥料养分指数</span>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 87%;"></div>
+        </div>
+        <span class="data-value">87 / 100</span>
+    </div>
+    
+    <div class="data-item">
+        <span><i class="fas fa-sun"></i> 光照强度</span>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: 66%; background: linear-gradient(90deg, #ffcc00, #ff9900);"></div>
+        </div>
+        <span class="data-value">13,200 lx</span>
+    </div>
+    
+    <div class="ai-suggestion">
+        <i class="fas fa-brain"></i> AI 决策建议：轻度补水，肥料保持当前强度。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fas fa-route"></i> 运输 & 质检链路</h2>
+    <div class="timeline">
+      <p>
+          <i class="fas fa-box-open"></i> <strong>07:30</strong>　采摘完成
+      </p>
+      <p>
+          <i class="fas fa-video"></i> <strong>07:32</strong>　采摘过程视频已上传 (点击查看)
+      </p>
+      <p>
+          <i class="fas fa-barcode"></i> <strong>08:10</strong>　装车扫码记录成功 (车辆：京A·T8888)
+      </p>
+      <p>
+          <i class="fas fa-warehouse"></i> <strong>10:42</strong>　车辆到达分拣中心
+      </p>
+      <p>
+          <i class="fas fa-store"></i> <strong>14:20</strong>　商品上架商超
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  智能农业 · 数据驱动 · 透明溯源 | Version 1.1 
+</footer>
+
+</body>
+</html>
