@@ -1,460 +1,132 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>智能农业溯源 — 视差演示 (主题统一版)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>智能农业溯源</title>
 <style>
-  /* 基础重置 */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,Helvetica,sans-serif;
-    background:#04050a; 
-    color:#f7fcff; /* 基础文字颜色使用亮色 */
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-    perspective:1000px; 
-  }
+/* -------- 基础重置 -------- */
+*{margin:0;padding:0;box-sizing:border-box}
+body,html{height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,sans-serif;background:#04050a;color:#f7fcff;overflow-x:hidden}
+img{display:block;width:100%;border-radius:10px}
 
-  /* -----------------------------------
-     全局主题连贯性: 背景层 (Fixed)
-     ----------------------------------- */
-  .parallax-stage{
-    position:fixed; inset:0; z-index:-10; overflow:hidden;
-    pointer-events:none;
-  }
-  .layer{
-    position:absolute; left:50%; top:50%;
-    width:140%; height:140%;
-    transform-origin:center;
-    background-repeat:no-repeat; background-position:center;
-    will-change:transform; 
-    filter:contrast(1.05) saturate(1.05);
-  }
+/* -------- 背景与光晕 -------- */
+.bg-layer{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#06101a,#081219 50%,#071018 100%);will-change:transform}
+.glow{position:fixed;top:15%;left:50%;width:60vmax;height:60vmax;background:radial-gradient(circle at 30% 30%,rgba(0,200,255,0.2),transparent 35%),radial-gradient(circle at 70% 70%,rgba(180,80,255,0.15),transparent 25%);filter:blur(50px);mix-blend-mode:screen;transform:translateX(-50%) translateY(-15%);z-index:-1}
 
-  .layer.bg {
-    background-image: radial-gradient(ellipse at 10% 20%, rgba(20,40,80,0.3), transparent 10%),
-                      radial-gradient(ellipse at 90% 80%, rgba(10,50,70,0.2), transparent 20%),
-                      linear-gradient(180deg,#06101a 0%, #081219 50%, #071018 100%);
-    opacity:1;
-    transform: translate(-50%,-50%) scale(1.02);
-  }
+/* -------- 布局 -------- */
+section{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 20px}
+.wrap{display:grid;grid-template-columns:1fr 300px;gap:20px;max-width:1100px;width:94%}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+@media(max-width:500px){.wrap{grid-template-columns:1fr;gap:16px}}
 
-  .layer.texture {
-    background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=60');
-    opacity:0.18; 
-    mix-blend-mode:screen; filter: blur(3px) grayscale(0.05); 
-    transform: translate(-50%,-50%) scale(1.04);
-  }
+/* -------- 卡片玻璃质感 -------- */
+.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;box-shadow:0 12px 32px rgba(0,0,0,0.6);transition:transform 0.3s ease,opacity 0.6s ease}
+.card h1,h2,h3{color:#00eaff;margin-bottom:12px}
+.card p{font-size:14px;opacity:0.9;line-height:1.4}
 
-  .layer.particles {
-    background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60');
-    opacity:0.15; 
-    mix-blend-mode:screen; filter: blur(4px) brightness(1.4); 
-    transform: translate(-50%,-50%) scale(1.06);
-  }
+/* -------- 前景卡片 3D -------- */
+.fg-layer{display:flex;gap:20px;justify-content:center;align-items:center;perspective:1200px;margin-top:40px}
+.fg-item{flex:1;transform-style:preserve-3d;transition:transform 0.3s,opacity 0.6s;opacity:0;transform:translateY(20px)}
+.fg-item.show{opacity:1;transform:translateY(0)}
 
-  .glow {
-    position:fixed; z-index:-5; width:70vmax; height:70vmax; left:50%; top:10%;
-    transform:translateX(-50%) translateY(-10%) translateZ(0); 
-    background: radial-gradient(circle at 30% 30%, rgba(0,220,255,0.2), rgba(0,100,200,0.1) 18%, transparent 35%),
-                radial-gradient(circle at 70% 70%, rgba(180,80,255,0.15), transparent 25%);
-    filter: blur(50px) saturate(1.8); 
-    mix-blend-mode:screen; pointer-events:none;
-    will-change:transform;
-  }
+/* -------- 渐入动画 -------- */
+.fade{opacity:0;transform:translateY(20px);transition:all 0.6s ease-out}
+.fade.show{opacity:1;transform:translateY(0)}
 
-  main { position:relative; z-index:2; }
-
-  section {
-    min-height:100vh; display:flex; align-items:center; justify-content:center;
-    padding: calc(40px + env(safe-area-inset-top)) 20px;
-  }
-
-  .wrap {
-    width:min(1200px,94%); margin:0 auto; display:grid; grid-template-columns:1fr 420px; gap:36px; align-items:start;
-  }
-
-  /* -----------------------------------
-     Hero 区块和侧边卡片 (与前景卡片统一主题)
-     ----------------------------------- */
-  .hero {
-    /* 统一背景和边框，使用前景卡片风格 */
-    padding:28px; 
-    border-radius:16px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); /* 更亮、更透明的背景 */
-    border:1px solid rgba(255,255,255,0.12); /* 更清晰的边框 */
-    box-shadow:0 12px 40px rgba(4,6,16,0.8); 
-    backdrop-filter: blur(12px) saturate(1.1); /* 统一模糊和饱和度 */
-    transform: translateZ(0); 
-  }
-
-  .side {
-    position:relative;
-    display:flex; flex-direction:column; gap:16px;
-  }
-  .card {
-    /* 统一背景和边框，使用前景卡片风格 */
-    padding:18px; /* 统一内边距 */
-    border-radius:14px; 
-    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); /* 更亮、更透明的背景 */
-    border:1px solid rgba(255,255,255,0.12); /* 更清晰的边框 */
-    backdrop-filter: blur(12px) saturate(1.1);
-    transform: translateZ(0); 
-  }
-  
-  /* -----------------------------------
-     字体和强调色 (高对比)
-     ----------------------------------- */
-  h1.title, h2.title { 
-    font-size:clamp(30px,6.5vw,56px); 
-    line-height:1.02; 
-    margin-bottom:20px; 
-    letter-spacing:0.2px;
-    color:#e0f7ff; 
-    text-shadow: 0 0 6px rgba(120, 220, 255, 0.4); 
-    transform-origin:left center;
-  }
-  .subtitle{ font-size:16px; opacity:0.95; margin-bottom:24px; max-width:54ch; }
-
-  .features{ display:flex; gap:12px; flex-wrap:wrap; margin-top:18px }
-  .chip{ 
-    background:rgba(0,150,255,0.1); 
-    padding:10px 14px; 
-    border-radius:999px; 
-    font-size:13px; 
-    border:1px solid rgba(0,180,255,0.3); 
-    color: #99eaff; 
-    box-shadow: 0 0 8px rgba(0,150,255,0.3); 
-  }
-
-  .muted{ color:rgba(230,240,255,0.85); font-size:14px; opacity:1; } 
-  .big-num{ 
-    font-size:28px; font-weight:700; 
-    color:#00eaff; 
-    text-shadow: 0 0 4px rgba(0, 234, 255, 0.6);
-  }
-
-  /* -----------------------------------
-     前景 3D 卡片样式 (FG Item)
-     ----------------------------------- */
-  .fg-layer{
-    position:relative; 
-    width:100%; height:auto;
-    display:flex; justify-content:center; align-items:center;
-    pointer-events:none; z-index:2;
-    padding: 60px 0 80px; 
-  }
-  .fg-card{
-    width:min(1100px,94%); max-width:1200px; pointer-events:auto;
-    display:flex; gap:20px; align-items:stretch;
-    transform-style:preserve-3d;
-    transition:transform 350ms cubic-bezier(.2,.9,.3,1);
-    will-change:transform;
-  }
-
-  .fg-item{
-    flex:1; min-width:220px; border-radius:16px; padding:18px;
-    /* 样式与 hero/card 统一 */
-    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); 
-    border:1px solid rgba(255,255,255,0.12); 
-    backdrop-filter: blur(12px) saturate(1.1); 
-    box-shadow:0 12px 40px rgba(2,6,23,0.8), inset 0 1px 0 rgba(255,255,255,0.05); 
-    color: #f7fcff; 
-    transform: translateZ(0); 
-  }
-  .fg-item[data-depth="20"] { transform: translateZ(20px); }
-  .fg-item[data-depth="40"] { transform: translateZ(40px); }
-  .fg-item[data-depth="80"] { transform: translateZ(80px); }
-
-  .fg-item img{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:12px}
-  .fg-item h3{font-size:18px;margin-bottom:8px}
-  .fg-item p{font-size:14px;opacity:0.95;line-height:1.5} 
-
-  /* -----------------------------------
-     响应式
-     ----------------------------------- */
-  .reveal{ 
-    opacity:0; 
-    transform:translateY(18px); 
-    transition:all 500ms cubic-bezier(.2,.9,.3,1); 
-  }
-  .reveal.show{ opacity:1; transform:none; }
-
-  .hint { margin-top:14px; font-size:13px; color:rgba(230,240,255,0.7) }
-
-  @media (max-width:900px){
-    .wrap{ grid-template-columns:1fr; }
-    .fg-card{ flex-direction:column; align-items:center; gap:14px }
-    .fg-item{ width:100% }
-    .fg-layer{ padding: 40px 0 60px; } 
-    .parallax .layer{ width:160%; height:160% }
-    
-    /* 移动端间距优化 */
-    .hero { padding: 20px; }
-    h1.title, h2.title { margin-bottom: 12px; } 
-    .subtitle { margin-bottom: 18px; } 
-    .features { margin-top: 10px; }
-  }
-  @media (max-width:520px){
-    h1.title{ font-size:28px }
-    .subtitle{ font-size:15px }
-    .glow{ display:none }
-  }
+/* -------- 响应式 -------- */
+@media(max-width:600px){
+  .fg-layer{flex-direction:column;align-items:center}
+  .fg-item{width:90%}
+}
 </style>
 </head>
 <body>
 
-  <div class="parallax-stage" aria-hidden="true">
-    <div class="layer bg" id="bg-layer"></div>
-    <div class="layer texture" id="texture-layer"></div>
-    <div class="layer particles" id="particles-layer"></div>
-  </div>
+<div class="bg-layer"></div>
+<div class="glow"></div>
 
-  <div class="glow" id="glow"></div>
-
-  <main>
-    <section>
-      <div class="wrap">
-        <div class="hero reveal" id="hero">
-          <h1 class="title">智能农业溯源系统</h1>
-          <p class="subtitle">集合 AI 摄像、环境传感、物流追踪与二维码溯源，提供端到端数据可信链。页面展示为演示效果，生产部署可接入真实数据源。</p>
-
-          <div class="features">
-            <span class="chip">全链路溯源</span>
-            <span class="chip">实时可视化</span>
-            <span class="chip">AI 风险检测</span>
-            <span class="chip">多终端适配</span>
-          </div>
-
-          <div class="hint">下滑查看演示区块，移动端会自动减少交互以节省性能。</div>
-        </div>
-
-        <aside class="side">
-          <div class="card reveal" id="statCard">
-            <div class="muted">当前地块</div>
-            <div class="big-num">PLOT-2025-11-A12</div>
-            <div class="muted" style="margin-top:10px">采摘时间：2025-11-16 07:30</div>
-          </div>
-
-          <div class="card reveal" id="quickCard">
-            <div class="muted">运输状态</div>
-            <div class="big-num">运输中 · 7h</div>
-            <div class="muted" style="margin-top:10px">车辆：京A·T8888</div>
-          </div>
-        </aside>
+<main>
+  <!-- Hero 区 -->
+  <section>
+    <div class="wrap">
+      <div class="card fade">
+        <h1>智能农业溯源系统</h1>
+        <p>集合 AI 摄像、环境传感、物流追踪与二维码溯源，提供端到端数据可信链。</p>
       </div>
-    </section>
-
-    <div class="fg-layer" id="fg">
-      <div class="fg-card" id="fgCard" aria-hidden="false">
-
-        <div class="fg-item" data-depth="40">
-          <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="田间影像">
-          <h3>田间影像</h3>
-          <p>AI 摄像头自动抓拍，关键生长阶段图像可回放与比对。</p>
-        </div>
-
-        <div class="fg-item" data-depth="80">
-          <img src="https://images.unsplash.com/photo-1544377038-f9d6c42171c7?auto=format&fit=crop&w=900&q=60" alt="运输地图">
-          <h3>运输地图</h3>
-          <p>实时轨迹叠加地图，车辆与时序数据同步展示（示例）。</p>
-        </div>
-
-        <div class="fg-item" data-depth="20">
-          <img src="https://images.unsplash.com/photo-1542845181-f09d8540d5df?auto=format&fit=crop&w=900&q=60" alt="AI 诊断">
-          <h3>AI 诊断</h3>
-          <p>模型推断作物健康与病害风险，提供处理建议与历史对比。</p>
-        </div>
-
+      <div class="card fade">
+        <h3>当前地块</h3>
+        <p>PLOT-2025-11-A12</p>
+        <p>采摘时间：2025-11-16 07:30</p>
       </div>
     </div>
+  </section>
 
-    <section>
-      <div class="wrap">
-        <div class="hero reveal" id="dataHero">
-          <h2 class="title">实时数据 · 仪表板预览</h2>
-          <p class="subtitle">温湿、光照、养分指标以安全阈值高亮；示例进度条、图表可以接入后端 API 动态刷新。</p>
-        </div>
+  <!-- 前景卡片 3D -->
+  <section class="fg-layer">
+    <div class="fg-item card fade" data-depth="30">
+      <img src="https://images.unsplash.com/photo-1592928300995-23a24a7df97d?auto=format&fit=crop&w=800&q=60" alt="田间影像">
+      <h3>田间影像</h3>
+      <p>AI 摄像头自动抓拍关键生长阶段。</p>
+    </div>
+    <div class="fg-item card fade" data-depth="60">
+      <img src="https://images.unsplash.com/photo-1606788075765-0b5f1f8d7030?auto=format&fit=crop&w=800&q=60" alt="运输地图">
+      <h3>运输地图</h3>
+      <p>实时轨迹与车辆数据同步显示。</p>
+    </div>
+    <div class="fg-item card fade" data-depth="20">
+      <img src="https://images.unsplash.com/photo-1581091012184-d7f55f6f4854?auto=format&fit=crop&w=800&q=60" alt="AI 诊断">
+      <h3>AI 诊断</h3>
+      <p>作物健康与病害风险分析。</p>
+    </div>
+  </section>
 
-        <aside class="side">
-          <div class="card reveal">
-            <div class="muted">土壤湿度</div>
-            <div class="big-num">62%</div>
-          </div>
-          <div class="card reveal">
-            <div class="muted">肥料养分</div>
-            <div class="big-num">87 / 100</div>
-          </div>
-        </aside>
+  <!-- 数据概览 -->
+  <section>
+    <div class="wrap">
+      <div class="card fade">
+        <h2>实时数据预览</h2>
+        <p>温湿、光照、养分指标可实时更新，支持端到端可视化。</p>
       </div>
-    </section>
-
-    <section>
-      <div class="wrap">
-        <div class="hero reveal" id="traceHero">
-          <h2 class="title">扫码查看溯源</h2>
-          <p class="subtitle">每箱商品带唯一 UID，扫描后可查看生长日志、质检录像与运输轨迹（此页为静态示例）。</p>
-        </div>
-
-        <aside class="side">
-          <div class="card reveal">
-            <div class="muted">质检记录</div>
-            <div class="big-num">合格</div>
-            <div class="muted" style="margin-top:10px">最近：2025-11-16 08:10</div>
-          </div>
-          <div class="card reveal">
-            <div class="muted">上架门店</div>
-            <div class="big-num">商超 · A区</div>
-          </div>
-        </aside>
+      <div class="card fade">
+        <h3>土壤湿度</h3>
+        <p>62%</p>
+        <h3>肥料养分</h3>
+        <p>87 / 100</p>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
 
 <script>
-/* -----------------------------------------------------------
- * 视差效果和交互逻辑 
- * ----------------------------------------------------------- */
+// 渐入淡入
+const faders = document.querySelectorAll('.fade');
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('show');observer.unobserve(e.target);}
+  });
+},{threshold:0.2});
+faders.forEach(f=>observer.observe(f));
 
-const Parallax = (() => {
-  const state = {
-    scrollY: 0,
-    mouseX: 0, 
-    mouseY: 0, 
-    isTouch: ('ontouchstart' in window) || navigator.maxTouchPoints > 1,
-    ticking: false,
-    fgCardVisible: false 
-  };
+// 前景卡片 3D 微浮动
+const fgItems = document.querySelectorAll('.fg-item');
+document.addEventListener('mousemove',e=>{
+  const cx=window.innerWidth/2,cy=window.innerHeight/2;
+  const mx=(e.clientX-cx)/cx, my=(e.clientY-cy)/cy;
+  fgItems.forEach(f=>{
+    const depth=f.dataset.depth||30;
+    f.style.transform=`translateZ(${depth}px) rotateY(${mx*6}deg) rotateX(${-my*6}deg)`;
+  });
+});
 
-  const bgLayer = document.getElementById('bg-layer');
-  const textureLayer = document.getElementById('texture-layer');
-  const particlesLayer = document.getElementById('particles-layer');
-  const glow = document.getElementById('glow');
-  const fgCard = document.getElementById('fgCard');
-  const fgItems = document.querySelectorAll('.fg-item');
-  const revealEls = document.querySelectorAll('.reveal');
-
-  function scheduleRender() {
-    if (!state.ticking) {
-      state.ticking = true;
-      requestAnimationFrame(() => {
-        applyTransforms();
-        state.ticking = false;
-      });
-    }
-  }
-
-  function applyTransforms() {
-    const sc = state.scrollY;
-    const mx = state.mouseX;
-    const my = state.mouseY;
-
-    // 1. 背景层：基于滚动 + 鼠标偏移 
-    const bgTranslateY = sc * 0.02 + (my * 4); 
-    const bgTranslateX = (mx * 6); 
-    bgLayer.style.transform = `translate(-50%,-50%) translateX(${bgTranslateX}px) translateY(${bgTranslateY}px) scale(1.02)`;
-
-    const texTranslateY = sc * 0.035 + (my * 8); 
-    const texTranslateX = (mx * 10); 
-    textureLayer.style.transform = `translate(-50%,-50%) translateX(${texTranslateX}px) translateY(${texTranslateY}px) scale(1.04)`;
-
-    const partsTranslateY = sc * 0.06 + (my * 14); 
-    const partsTranslateX = (mx * 16); 
-    particlesLayer.style.transform = `translate(-50%,-50%) translateX(${partsTranslateX}px) translateY(${partsTranslateY}px) scale(1.06)`;
-
-    // 2. 前景卡片 3D 效果
-    if (state.fgCardVisible && !state.isTouch) {
-        const tiltX = (my * 6);   
-        const tiltY = (mx * -6);  
-        fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-
-        fgItems.forEach(el => {
-            const depth = Number(el.dataset.depth) || 30;
-            const moveX = mx * (depth / 30) * 12; 
-            const moveY = my * (depth / 60) * 8;
-            el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
-        });
-    } else {
-        fgCard.style.transform = `translateZ(0) rotateX(0deg) rotateY(0deg)`;
-        fgItems.forEach(el => {
-            const depth = Number(el.dataset.depth) || 30;
-            el.style.transform = `translateZ(${depth}px)`;
-        });
-    }
-
-    // 3. 光晕跟随 
-    const glowX = mx * 6; 
-    const glowY = my * 14; 
-    glow.style.transform = `translateX(-50%) translateY(-10%) translateX(${glowX}%) translateY(${glowY}%) translateZ(0)`;
-  }
-
-  /* 初始化事件监听器 */
-  function initListeners() {
-    window.addEventListener('scroll', () => {
-      state.scrollY = window.scrollY || window.pageYOffset || 0;
-      scheduleRender();
-    }, {passive: true});
-
-    if (!state.isTouch) {
-      window.addEventListener('mousemove', e => {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        state.mouseX = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
-        state.mouseY = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
-        scheduleRender();
-      }, {passive: true});
-    }
-  }
-
-  /* IntersectionObserver for Fade-In Effect */
-  function initRevealEffect() {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-          io.unobserve(entry.target);
-        }
-      });
-    }, {threshold: 0.18});
-
-    revealEls.forEach((el, i) => {
-      el.style.transitionDelay = (i * 80) + 'ms';
-      io.observe(el);
-    });
-  }
-
-  /* IntersectionObserver for 3D Card Activation */
-  function initCardObserver() {
-    const cardIO = new IntersectionObserver((entries) => {
-      state.fgCardVisible = entries[0].isIntersecting;
-      scheduleRender(); 
-    }, {
-      rootMargin: '0px',
-      threshold: 0.05 
-    });
-
-    if (fgCard) {
-      cardIO.observe(fgCard.parentNode); 
-    }
-  }
-
-  /* 初始化所有功能 */
-  function init() {
-    state.scrollY = window.scrollY || 0;
-    
-    initListeners();
-    initRevealEffect();
-    initCardObserver();
-
-    scheduleRender(); 
-  }
-
-  return { init };
-})();
-
-Parallax.init();
+// 简单滚动视差
+const bg = document.querySelector('.bg-layer');
+const glow = document.querySelector('.glow');
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY;
+  bg.style.transform=`translateY(${y*0.2}px)`;
+  glow.style.transform=`translateX(-50%) translateY(${-15+y*0.15}px)`;
+});
 </script>
 </body>
 </html>
