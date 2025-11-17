@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>智能农业溯源 — 高级视差演示</title>
+<title>智能农业溯源 — 视差演示 (优化版)</title>
 <style>
   /* 基础重置 */
   *{box-sizing:border-box;margin:0;padding:0}
@@ -30,7 +30,6 @@
     filter:contrast(1.05) saturate(1.05);
   }
 
-  /* 背景层（最远） */
   .layer.bg {
     background-image: radial-gradient(ellipse at 10% 20%, rgba(20,30,60,0.22), transparent 10%),
                       radial-gradient(ellipse at 90% 80%, rgba(10,60,90,0.12), transparent 20%),
@@ -39,33 +38,34 @@
     transform: translate(-50%,-50%) scale(1.02);
   }
 
-  /* 中间纹理层 */
   .layer.texture {
     background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=60');
     opacity:0.14; mix-blend-mode:screen; filter: blur(4px) grayscale(0.1);
-    transform: translate(-50%,-50%) scale(1.05);
+    transform: translate(-50%,-50%) scale(1.04);
   }
 
-  /* 颗粒 / 星尘层（轻发光） */
   .layer.particles {
     background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60');
     opacity:0.1; mix-blend-mode:screen; filter: blur(6px) brightness(1.2);
-    transform: translate(-50%,-50%) scale(1.08);
+    transform: translate(-50%,-50%) scale(1.06);
   }
 
-  /* 视差前景图（农产品、地图、AI 示意图） */
+  /* --- 关键优化：前景卡片跟随滚动 (移除 fixed) --- */
   .fg-layer{
-    position:fixed; inset:auto 0 0 0; height:50vh; display:flex; justify-content:center; align-items:flex-end;
-    pointer-events:none; z-index:0;
+    position:relative; /* 参与文档流，不再固定 */
+    width:100%; height:auto;
+    display:flex; justify-content:center; align-items:center;
+    pointer-events:none; z-index:2;
+    padding: 60px 0 80px; /* 增加上下间距 */
   }
   .fg-card{
     width:min(1100px,94%); max-width:1200px; pointer-events:auto;
     display:flex; gap:20px; align-items:stretch;
     transform-style:preserve-3d;
     transition:transform 350ms cubic-bezier(.2,.9,.3,1);
+    will-change:transform;
   }
 
-  /* 三个前景模块，带微妙玻璃 */
   .fg-item{
     flex:1; min-width:220px; border-radius:16px; padding:18px;
     background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
@@ -73,13 +73,18 @@
     backdrop-filter: blur(10px) saturate(1.05);
     box-shadow:0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
     color: #eaf3ff;
-    transform: translateZ(0);
+    /* 优化: 确保 3D 上下文和 Z 深度 */
+    transform: translateZ(0); 
   }
+  /* 设置基础 Z 深度，JS 会增加 X/Y 视差 */
+  .fg-item[data-depth="20"] { transform: translateZ(20px); }
+  .fg-item[data-depth="40"] { transform: translateZ(40px); }
+  .fg-item[data-depth="80"] { transform: translateZ(80px); }
+
   .fg-item img{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:12px}
   .fg-item h3{font-size:18px;margin-bottom:8px}
   .fg-item p{font-size:14px;opacity:0.85;line-height:1.5}
 
-  /* 光晕层（可动） */
   .glow {
     position:fixed; z-index:-5; width:60vmax; height:60vmax; left:50%; top:10%;
     transform:translateX(-50%) translateY(-10%);
@@ -87,9 +92,9 @@
                 radial-gradient(circle at 70% 70%, rgba(120,60,255,0.08), transparent 25%);
     filter: blur(40px) saturate(1.2);
     mix-blend-mode:screen; pointer-events:none;
+    will-change:transform;
   }
 
-  /* 主内容区（滚动内容） */
   main { position:relative; z-index:2; }
 
   section {
@@ -101,13 +106,14 @@
     width:min(1200px,94%); margin:0 auto; display:grid; grid-template-columns:1fr 420px; gap:36px; align-items:start;
   }
 
-  /* 左主列（文案 + 大标题） */
+  /* 优化: 为所有包含 backdrop-filter 的元素强制 3D 上下文 */
   .hero {
     padding:28px; border-radius:16px;
     background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border:1px solid rgba(255,255,255,0.04);
     box-shadow:0 12px 40px rgba(4,6,16,0.6);
     backdrop-filter: blur(10px);
+    transform: translateZ(0); /* 性能优化 */
   }
 
   h1.title{
@@ -118,33 +124,40 @@
   .subtitle{ font-size:16px; opacity:0.86; margin-bottom:18px; max-width:54ch; }
 
   .features{ display:flex; gap:12px; flex-wrap:wrap; margin-top:18px }
-  .chip{ background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:999px; font-size:13px; border:1px solid rgba(255,255,255,0.03) }
+  /* 优化: 芯片样式增加对比度 */
+  .chip{ 
+    background:rgba(255,255,255,0.06); 
+    padding:10px 14px; 
+    border-radius:999px; 
+    font-size:13px; 
+    border:1px solid rgba(255,255,255,0.08); 
+    color: #c5e7ff; 
+    box-shadow: 0 0 4px rgba(0,200,230,0.2); 
+  }
 
-  /* 右侧小卡（信息 / 快速入口） */
   .side {
     position:relative;
     display:flex; flex-direction:column; gap:16px;
   }
+  /* 优化: 为所有包含 backdrop-filter 的元素强制 3D 上下文 */
   .card {
     padding:16px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
     border:1px solid rgba(255,255,255,0.04); backdrop-filter: blur(10px);
+    transform: translateZ(0); /* 性能优化 */
   }
   .muted{ color:rgba(230,240,255,0.7); font-size:14px; opacity:0.9 }
   .big-num{ font-size:28px; font-weight:700; color:#eaffff }
 
-  /* 进入动画占位 */
   .reveal{ opacity:0; transform:translateY(18px); transition:all 700ms cubic-bezier(.2,.9,.3,1); }
   .reveal.show{ opacity:1; transform:none; }
 
-  /* 滚动视差提示 */
   .hint { margin-top:14px; font-size:13px; color:rgba(230,240,255,0.6) }
 
-  /* 响应式：手机降级布局 */
   @media (max-width:900px){
     .wrap{ grid-template-columns:1fr; }
     .fg-card{ flex-direction:column; align-items:center; gap:14px }
     .fg-item{ width:100% }
-    .fg-layer{ height:36vh; bottom:6vh; }
+    .fg-layer{ padding: 40px 0 60px; } /* 调整移动端间距 */
     .parallax .layer{ width:160%; height:160% }
   }
   @media (max-width:520px){
@@ -156,43 +169,15 @@
 </head>
 <body>
 
-  <!-- 多层背景（fixed） -->
   <div class="parallax-stage" aria-hidden="true">
     <div class="layer bg" id="bg-layer"></div>
     <div class="layer texture" id="texture-layer"></div>
     <div class="layer particles" id="particles-layer"></div>
   </div>
 
-  <!-- 光晕 -->
   <div class="glow" id="glow"></div>
 
-  <!-- 前景卡（可由鼠标/触控驱动 3D 视差） -->
-  <div class="fg-layer" id="fg">
-    <div class="fg-card" id="fgCard" aria-hidden="false">
-
-      <div class="fg-item" data-depth="40">
-        <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="农产品">
-        <h3>田间影像</h3>
-        <p>AI 摄像头自动抓拍，关键生长阶段图像可回放与比对。</p>
-      </div>
-
-      <div class="fg-item" data-depth="80">
-        <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=60" alt="地图">
-        <h3>运输地图</h3>
-        <p>实时轨迹叠加地图，车辆与时序数据同步展示（示例）。</p>
-      </div>
-
-      <div class="fg-item" data-depth="20">
-        <img src="https://images.unsplash.com/photo-1581092334474-8f8c6f2c6baf?auto=format&fit=crop&w=900&q=60" alt="AI 图">
-        <h3>AI 诊断</h3>
-        <p>模型推断作物健康与病害风险，提供处理建议与历史对比。</p>
-      </div>
-
-    </div>
-  </div>
-
   <main>
-    <!-- 第一屏 -->
     <section>
       <div class="wrap">
         <div class="hero reveal" id="hero">
@@ -225,7 +210,29 @@
       </div>
     </section>
 
-    <!-- 第二屏：数据预览 -->
+    <div class="fg-layer" id="fg">
+      <div class="fg-card" id="fgCard" aria-hidden="false">
+
+        <div class="fg-item" data-depth="40">
+          <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="农产品">
+          <h3>田间影像</h3>
+          <p>AI 摄像头自动抓拍，关键生长阶段图像可回放与比对。</p>
+        </div>
+
+        <div class="fg-item" data-depth="80">
+          <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=60" alt="地图">
+          <h3>运输地图</h3>
+          <p>实时轨迹叠加地图，车辆与时序数据同步展示（示例）。</p>
+        </div>
+
+        <div class="fg-item" data-depth="20">
+          <img src="https://images.unsplash.com/photo-1581092334474-8f8c6f2c6baf?auto=format&fit=crop&w=900&q=60" alt="AI 图">
+          <h3>AI 诊断</h3>
+          <p>模型推断作物健康与病害风险，提供处理建议与历史对比。</p>
+        </div>
+
+      </div>
+    </div>
     <section>
       <div class="wrap">
         <div class="hero reveal" id="dataHero">
@@ -246,7 +253,6 @@
       </div>
     </section>
 
-    <!-- 第三屏：二维码/流程 -->
     <section>
       <div class="wrap">
         <div class="hero reveal" id="traceHero">
@@ -270,103 +276,160 @@
   </main>
 
 <script>
-/* ============================
-   1) 背景与前景视差（滚动 + 鼠标）
-   ============================ */
-const bg = document.getElementById('bg-layer');
-const tex = document.getElementById('texture-layer');
-const parts = document.getElementById('particles-layer');
-const glow = document.getElementById('glow');
-const fgCard = document.getElementById('fgCard');
+/* -----------------------------------------------------------
+ * 视差效果和交互逻辑 (已优化性能和兼容性)
+ * ----------------------------------------------------------- */
 
-let lastScroll = 0;
-function onScrollParallax(){
-  const sc = window.scrollY;
-  // 滚动时不同层的移动幅度（越后面越慢）
-  bg.style.transform = `translate(-50%,-50%) translateY(${sc * 0.02}px) scale(1.02)`;
-  tex.style.transform = `translate(-50%,-50%) translateY(${sc * 0.035}px) scale(1.04)`;
-  parts.style.transform = `translate(-50%,-50%) translateY(${sc * 0.06}px) scale(1.06)`;
-  // 前景微浮动（让卡片有上浮错层）
-  const fgTranslate = Math.min(sc * -0.02, 0);
-  fgCard.style.transform = `translateZ(0) translateY(${fgTranslate}px)`;
-  lastScroll = sc;
-}
-window.addEventListener('scroll', () => requestAnimationFrame(onScrollParallax), {passive:true});
+const Parallax = (() => {
+  const state = {
+    scrollY: 0,
+    mouseX: 0, // -1 .. 1
+    mouseY: 0, // -1 .. 1
+    isTouch: ('ontouchstart' in window) || navigator.maxTouchPoints > 1,
+    ticking: false,
+    fgCardVisible: false // 新增：用于判断前景卡片是否可见，以便开启 3D 效果
+  };
 
-/* 鼠标移动产生 3D 视差（桌面启用，移动端关闭） */
-let isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 1;
-if(!isTouch){
-  window.addEventListener('mousemove', e => {
-    const cx = window.innerWidth/2, cy = window.innerHeight/2;
-    const dx = (e.clientX - cx) / cx; // -1 .. 1
-    const dy = (e.clientY - cy) / cy;
-    // 背景慢移动
-    bg.style.transform += ` translateX(${dx * 8}px) translateY(${dy * 6}px)`;
-    // 轻微旋转卡片组
-    const tiltX = dy * 6; const tiltY = dx * -6;
-    fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-    // 光晕跟随
-    glow.style.transform = `translateX(${dx * 8}%) translateY(${dy * 18}%)`;
-    // 单独每个前景子项深度偏移
-    document.querySelectorAll('.fg-item').forEach(el=>{
-      const depth = parseFloat(el.dataset.depth)||30;
-      const moveX = dx * (depth/20);
-      const moveY = dy * (depth/40);
-      el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
+  const bgLayer = document.getElementById('bg-layer');
+  const textureLayer = document.getElementById('texture-layer');
+  const particlesLayer = document.getElementById('particles-layer');
+  const glow = document.getElementById('glow');
+  const fgCard = document.getElementById('fgCard');
+  const fgItems = document.querySelectorAll('.fg-item');
+  const revealEls = document.querySelectorAll('.reveal');
+
+  /* 合并渲染：使用 requestAnimationFrame */
+  function scheduleRender() {
+    if (!state.ticking) {
+      state.ticking = true;
+      requestAnimationFrame(() => {
+        applyTransforms();
+        state.ticking = false;
+      });
+    }
+  }
+
+  /* 计算并应用 transform (幂等) */
+  function applyTransforms() {
+    const sc = state.scrollY;
+    const mx = state.mouseX;
+    const my = state.mouseY;
+
+    // 1. 背景层：基于滚动 + 鼠标偏移
+    const bgTranslateY = sc * 0.02 + (my * 6);
+    const bgTranslateX = (mx * 8);
+    bgLayer.style.transform = `translate(-50%,-50%) translateX(${bgTranslateX}px) translateY(${bgTranslateY}px) scale(1.02)`;
+
+    const texTranslateY = sc * 0.035 + (my * 10);
+    const texTranslateX = (mx * 12);
+    textureLayer.style.transform = `translate(-50%,-50%) translateX(${texTranslateX}px) translateY(${texTranslateY}px) scale(1.04)`;
+
+    const partsTranslateY = sc * 0.06 + (my * 18);
+    const partsTranslateX = (mx * 20);
+    particlesLayer.style.transform = `translate(-50%,-50%) translateX(${partsTranslateX}px) translateY(${partsTranslateY}px) scale(1.06)`;
+
+    // 2. 前景卡片 (只在可见且非触摸设备上应用 3D 倾斜)
+    if (state.fgCardVisible && !state.isTouch) {
+        const tiltX = (my * 6);   // rotateX
+        const tiltY = (mx * -6);  // rotateY
+        // 移除滚动相关的 translateY 效果
+        fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+        // 每个前景子项根据 depth 微偏移
+        fgItems.forEach(el => {
+            const depth = Number(el.dataset.depth) || 30;
+            const moveX = mx * (depth / 30) * 12; 
+            const moveY = my * (depth / 60) * 8;
+            // 使用 translateZ() 确保 3D 上下文，并应用 X/Y 偏移
+            el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
+        });
+    } else {
+        // 在不可见或触摸设备上，重置 transform，只保留 CSS 中设置的 translateZ
+        fgCard.style.transform = `translateZ(0) rotateX(0deg) rotateY(0deg)`;
+        fgItems.forEach(el => {
+            const depth = Number(el.dataset.depth) || 30;
+            // 确保 translateZ 恢复到初始值
+            el.style.transform = `translateZ(${depth}px)`;
+        });
+    }
+
+    // 3. 光晕跟随
+    const glowX = mx * 8; 
+    const glowY = my * 18;
+    glow.style.transform = `translateX(-50%) translateY(-10%) translateX(${glowX}%) translateY(${glowY}%)`;
+  }
+
+  /* 初始化事件监听器 */
+  function initListeners() {
+    // 滚动监听 (被动)
+    window.addEventListener('scroll', () => {
+      state.scrollY = window.scrollY || window.pageYOffset || 0;
+      scheduleRender();
+    }, {passive: true});
+
+    // 鼠标移动监听：只在非触摸设备启用
+    if (!state.isTouch) {
+      window.addEventListener('mousemove', e => {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        state.mouseX = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+        state.mouseY = Math.max(-1, Math.min(1, (e.clientY - cy) / cy));
+        scheduleRender();
+      }, {passive: true});
+    }
+  }
+
+  /* IntersectionObserver for Fade-In Effect */
+  function initRevealEffect() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold: 0.18});
+
+    revealEls.forEach((el, i) => {
+      el.style.transitionDelay = (i * 80) + 'ms';
+      io.observe(el);
     });
-  });
-} else {
-  // 移动端优化：轻微根据倾斜和滚动做响应（不使用鼠标）
-  window.addEventListener('deviceorientation', ev => {
-    const rx = ev.beta || 0; // -180 .. 180
-    const ry = ev.gamma || 0;
-    const dx = Math.max(Math.min(ry/30, 1), -1);
-    const dy = Math.max(Math.min(rx/45, 1), -1);
-    glow.style.transform = `translateX(${dx * 8}%) translateY(${dy * 6}%)`;
-  }, {passive:true});
-}
+  }
 
-/* ============================
-   2) 进入动画（分层淡入 + stagger）
-   ============================ */
-const revealEls = document.querySelectorAll('.reveal');
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.classList.add('show');
-      // 解除观察，避免重复触发
-      io.unobserve(entry.target);
+  /* IntersectionObserver for 3D Card Activation (性能优化) */
+  function initCardObserver() {
+    const cardIO = new IntersectionObserver((entries) => {
+      state.fgCardVisible = entries[0].isIntersecting;
+      // 当卡片离开/进入视口时，重新渲染以确保 transform 状态正确
+      scheduleRender(); 
+    }, {
+      rootMargin: '0px',
+      threshold: 0.05 // 只要卡片有 5% 进入视口即激活 3D 效果
+    });
+
+    if (fgCard) {
+      cardIO.observe(fgCard.parentNode); // 观察 .fg-layer
     }
-  });
-},{threshold:0.18});
+  }
 
-revealEls.forEach((el, i) => {
-  el.style.transitionDelay = (i*80) + 'ms';
-  io.observe(el);
-});
+  /* 初始化所有功能 */
+  function init() {
+    // 初始状态设置
+    state.scrollY = window.scrollY || 0;
+    
+    initListeners();
+    initRevealEffect();
+    initCardObserver();
 
-/* ============================
-   3) 性能降级 & 防抖（resize）
-   ============================ */
-let resizeTO;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTO);
-  resizeTO = setTimeout(() => {
-    // 移动端隐藏鼠标驱动时的 transform 误差
-    if('ontouchstart' in window || navigator.maxTouchPoints > 1){
-      fgCard.style.transform = 'translateZ(0) translateY(0)';
-      document.querySelectorAll('.fg-item').forEach(el=> el.style.transform = 'none');
-    }
-  }, 120);
-});
+    // 初始渲染一次
+    scheduleRender(); 
+  }
 
-/* ============================
-   4) 小提示：可扩展为真实数据推送（示例）
-   ============================ */
-// 这里可插入 fetch() 调用真实后端 API，更新侧栏数值、前景图片或仪表
-// 示例（注释）：
-// fetch('/api/plot/2025-11-A12').then(r=>r.json()).then(data => { document.querySelector('.big-num').textContent = data.id; });
+  return { init };
+})();
 
+// 页面加载完毕后开始
+Parallax.init();
 </script>
 </body>
 </html>
