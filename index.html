@@ -1,179 +1,372 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>智能溯源仪表盘</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>智能农业溯源 — 高级视差演示</title>
 <style>
-    * {
-        margin: 0; padding: 0;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro", Roboto, Helvetica, sans-serif;
-    }
+  /* 基础重置 */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,Helvetica,sans-serif;
+    background:#04050a; color:#eef2f6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    perspective:1000px; /* 3D 效果基础 */
+  }
 
-    body {
-        background: linear-gradient(135deg, #0d0f13, #1b1f26, #0d0f13);
-        background-size: 200% 200%;
-        animation: bgMove 18s ease infinite;
-        padding: 25px;
-        color: #fff;
-    }
+  /* 固定视差舞台（多层背景） */
+  .parallax-stage{
+    position:fixed; inset:0; z-index:-10; overflow:hidden;
+    pointer-events:none;
+  }
+  .layer{
+    position:absolute; left:50%; top:50%;
+    width:140%; height:140%;
+    transform-origin:center;
+    background-repeat:no-repeat; background-position:center;
+    will-change:transform,opacity,filter;
+    filter:contrast(1.05) saturate(1.05);
+  }
 
-    @keyframes bgMove {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+  /* 背景层（最远） */
+  .layer.bg {
+    background-image: radial-gradient(ellipse at 10% 20%, rgba(20,30,60,0.22), transparent 10%),
+                      radial-gradient(ellipse at 90% 80%, rgba(10,60,90,0.12), transparent 20%),
+                      linear-gradient(180deg,#06101a 0%, #081219 50%, #071018 100%);
+    opacity:1;
+    transform: translate(-50%,-50%) scale(1.02);
+  }
 
-    /* ======= 顶部标题 ======= */
-    .title {
-        text-align: center;
-        margin-bottom: 28px;
-    }
+  /* 中间纹理层 */
+  .layer.texture {
+    background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=60');
+    opacity:0.14; mix-blend-mode:screen; filter: blur(4px) grayscale(0.1);
+    transform: translate(-50%,-50%) scale(1.05);
+  }
 
-    .title h1 {
-        font-size: 2.4rem;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin-bottom: 6px;
-    }
+  /* 颗粒 / 星尘层（轻发光） */
+  .layer.particles {
+    background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60');
+    opacity:0.1; mix-blend-mode:screen; filter: blur(6px) brightness(1.2);
+    transform: translate(-50%,-50%) scale(1.08);
+  }
 
-    .title p {
-        opacity: 0.7;
-        font-size: 1.1rem;
-    }
+  /* 视差前景图（农产品、地图、AI 示意图） */
+  .fg-layer{
+    position:fixed; inset:auto 0 0 0; height:50vh; display:flex; justify-content:center; align-items:flex-end;
+    pointer-events:none; z-index:0;
+  }
+  .fg-card{
+    width:min(1100px,94%); max-width:1200px; pointer-events:auto;
+    display:flex; gap:20px; align-items:stretch;
+    transform-style:preserve-3d;
+    transition:transform 350ms cubic-bezier(.2,.9,.3,1);
+  }
 
-    /* ======= 网格布局（响应式） ======= */
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 22px;
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+  /* 三个前景模块，带微妙玻璃 */
+  .fg-item{
+    flex:1; min-width:220px; border-radius:16px; padding:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px) saturate(1.05);
+    box-shadow:0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    color: #eaf3ff;
+    transform: translateZ(0);
+  }
+  .fg-item img{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:12px}
+  .fg-item h3{font-size:18px;margin-bottom:8px}
+  .fg-item p{font-size:14px;opacity:0.85;line-height:1.5}
 
-    /* ======= 玻璃卡片 ======= */
-    .card {
-        padding: 25px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow:
-            0 4px 30px rgba(0,0,0,0.4),
-            inset 0 0 30px rgba(255,255,255,0.04);
-        animation: fadeUp 1.3s ease both;
-    }
+  /* 光晕层（可动） */
+  .glow {
+    position:fixed; z-index:-5; width:60vmax; height:60vmax; left:50%; top:10%;
+    transform:translateX(-50%) translateY(-10%);
+    background: radial-gradient(circle at 30% 30%, rgba(0,200,230,0.14), rgba(0,120,200,0.06) 18%, transparent 35%),
+                radial-gradient(circle at 70% 70%, rgba(120,60,255,0.08), transparent 25%);
+    filter: blur(40px) saturate(1.2);
+    mix-blend-mode:screen; pointer-events:none;
+  }
 
-    @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(25px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
+  /* 主内容区（滚动内容） */
+  main { position:relative; z-index:2; }
 
-    .card h2 {
-        font-size: 1.3rem;
-        margin-bottom: 16px;
-        opacity: 0.9;
-    }
+  section {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding: calc(40px + env(safe-area-inset-top)) 20px;
+  }
 
-    /* ======= 环形数据图（纯 CSS） ======= */
-    .circle {
-        width: 120px;
-        height: 120px;
-        margin: auto;
-        border-radius: 50%;
-        position: relative;
-    }
+  .wrap {
+    width:min(1200px,94%); margin:0 auto; display:grid; grid-template-columns:1fr 420px; gap:36px; align-items:start;
+  }
 
-    .circle .inner {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        background: conic-gradient(#1f85ff var(--p), rgba(255,255,255,0.1) 0);
-    }
+  /* 左主列（文案 + 大标题） */
+  .hero {
+    padding:28px; border-radius:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04);
+    box-shadow:0 12px 40px rgba(4,6,16,0.6);
+    backdrop-filter: blur(10px);
+  }
 
-    .circle .text {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.3rem;
-        font-weight: 600;
-    }
+  h1.title{
+    font-size:clamp(30px,6.5vw,56px); line-height:1.02; margin-bottom:14px; letter-spacing:0.2px;
+    color:#f7fbff;
+    transform-origin:left center;
+  }
+  .subtitle{ font-size:16px; opacity:0.86; margin-bottom:18px; max-width:54ch; }
 
-    /* ======= 条形数据条 ======= */
-    .bar {
-        margin-top: 14px;
-        width: 100%;
-        height: 10px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 6px;
-        overflow: hidden;
-    }
-    .bar .fill {
-        height: 100%;
-        background: linear-gradient(90deg, #1f85ff, #52ffe2);
-        width: var(--w);
-        transition: width 1.2s ease;
-    }
+  .features{ display:flex; gap:12px; flex-wrap:wrap; margin-top:18px }
+  .chip{ background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:999px; font-size:13px; border:1px solid rgba(255,255,255,0.03) }
+
+  /* 右侧小卡（信息 / 快速入口） */
+  .side {
+    position:relative;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .card {
+    padding:16px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04); backdrop-filter: blur(10px);
+  }
+  .muted{ color:rgba(230,240,255,0.7); font-size:14px; opacity:0.9 }
+  .big-num{ font-size:28px; font-weight:700; color:#eaffff }
+
+  /* 进入动画占位 */
+  .reveal{ opacity:0; transform:translateY(18px); transition:all 700ms cubic-bezier(.2,.9,.3,1); }
+  .reveal.show{ opacity:1; transform:none; }
+
+  /* 滚动视差提示 */
+  .hint { margin-top:14px; font-size:13px; color:rgba(230,240,255,0.6) }
+
+  /* 响应式：手机降级布局 */
+  @media (max-width:900px){
+    .wrap{ grid-template-columns:1fr; }
+    .fg-card{ flex-direction:column; align-items:center; gap:14px }
+    .fg-item{ width:100% }
+    .fg-layer{ height:36vh; bottom:6vh; }
+    .parallax .layer{ width:160%; height:160% }
+  }
+  @media (max-width:520px){
+    h1.title{ font-size:28px }
+    .subtitle{ font-size:15px }
+    .glow{ display:none }
+  }
 </style>
 </head>
-
 <body>
 
-<div class="title">
-    <h1>智能溯源数据仪表盘</h1>
-    <p>实时监测 • 全链路透明 • 精准可视化</p>
-</div>
+  <!-- 多层背景（fixed） -->
+  <div class="parallax-stage" aria-hidden="true">
+    <div class="layer bg" id="bg-layer"></div>
+    <div class="layer texture" id="texture-layer"></div>
+    <div class="layer particles" id="particles-layer"></div>
+  </div>
 
-<div class="grid">
+  <!-- 光晕 -->
+  <div class="glow" id="glow"></div>
 
-    <div class="card">
-        <h2>土壤湿度</h2>
-        <div class="circle" style="--p: 62%;">
-            <div class="inner"></div>
-            <div class="text">62%</div>
-        </div>
-        <div class="bar" style="--w:62%;">
-            <div class="fill"></div>
-        </div>
+  <!-- 前景卡（可由鼠标/触控驱动 3D 视差） -->
+  <div class="fg-layer" id="fg">
+    <div class="fg-card" id="fgCard" aria-hidden="false">
+
+      <div class="fg-item" data-depth="40">
+        <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="农产品">
+        <h3>田间影像</h3>
+        <p>AI 摄像头自动抓拍，关键生长阶段图像可回放与比对。</p>
+      </div>
+
+      <div class="fg-item" data-depth="80">
+        <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=60" alt="地图">
+        <h3>运输地图</h3>
+        <p>实时轨迹叠加地图，车辆与时序数据同步展示（示例）。</p>
+      </div>
+
+      <div class="fg-item" data-depth="20">
+        <img src="https://images.unsplash.com/photo-1581092334474-8f8c6f2c6baf?auto=format&fit=crop&w=900&q=60" alt="AI 图">
+        <h3>AI 诊断</h3>
+        <p>模型推断作物健康与病害风险，提供处理建议与历史对比。</p>
+      </div>
+
     </div>
+  </div>
 
-    <div class="card">
-        <h2>土壤温度</h2>
-        <div class="circle" style="--p: 45%;">
-            <div class="inner" style="background:conic-gradient(#ff7b22 45%, rgba(255,255,255,0.1) 0);"></div>
-            <div class="text">18.4°C</div>
-        </div>
-        <div class="bar" style="--w:45%;">
-            <div class="fill" style="background:linear-gradient(90deg,#ff7b22,#ff3c00)"></div>
-        </div>
-    </div>
+  <main>
+    <!-- 第一屏 -->
+    <section>
+      <div class="wrap">
+        <div class="hero reveal" id="hero">
+          <h1 class="title">智能农业溯源系统</h1>
+          <p class="subtitle">集合 AI 摄像、环境传感、物流追踪与二维码溯源，提供端到端数据可信链。页面展示为演示效果，生产部署可接入真实数据源。</p>
 
-    <div class="card">
-        <h2>养分指数</h2>
-        <div class="circle" style="--p: 87%;">
-            <div class="inner"></div>
-            <div class="text">87</div>
-        </div>
-        <div class="bar" style="--w:87%;"></div>
-    </div>
+          <div class="features">
+            <span class="chip">全链路溯源</span>
+            <span class="chip">实时可视化</span>
+            <span class="chip">AI 风险检测</span>
+            <span class="chip">多终端适配</span>
+          </div>
 
-    <div class="card">
-        <h2>光照强度</h2>
-        <div class="circle" style="--p: 66%;">
-            <div class="inner" style="background:conic-gradient(#ffda4b 66%, rgba(255,255,255,0.1) 0);"></div>
-            <div class="text">13200 lx</div>
+          <div class="hint">下滑查看演示区块，移动端会自动减少交互以节省性能。</div>
         </div>
-        <div class="bar" style="--w:66%;">
-            <div class="fill" style="background:linear-gradient(90deg,#ffd84b,#ff9900)"></div>
+
+        <aside class="side">
+          <div class="card reveal" id="statCard">
+            <div class="muted">当前地块</div>
+            <div class="big-num">PLOT-2025-11-A12</div>
+            <div class="muted" style="margin-top:10px">采摘时间：2025-11-16 07:30</div>
+          </div>
+
+          <div class="card reveal" id="quickCard">
+            <div class="muted">运输状态</div>
+            <div class="big-num">运输中 · 7h</div>
+            <div class="muted" style="margin-top:10px">车辆：京A·T8888</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 第二屏：数据预览 -->
+    <section>
+      <div class="wrap">
+        <div class="hero reveal" id="dataHero">
+          <h2 class="title">实时数据 · 仪表板预览</h2>
+          <p class="subtitle">温湿、光照、养分指标以安全阈值高亮；示例进度条、图表可以接入后端 API 动态刷新。</p>
         </div>
-    </div>
 
-</div>
+        <aside class="side">
+          <div class="card reveal">
+            <div class="muted">土壤湿度</div>
+            <div class="big-num">62%</div>
+          </div>
+          <div class="card reveal">
+            <div class="muted">肥料养分</div>
+            <div class="big-num">87 / 100</div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
+    <!-- 第三屏：二维码/流程 -->
+    <section>
+      <div class="wrap">
+        <div class="hero reveal" id="traceHero">
+          <h2 class="title">扫码查看溯源</h2>
+          <p class="subtitle">每箱商品带唯一 UID，扫描后可查看生长日志、质检录像与运输轨迹（此页为静态示例）。</p>
+        </div>
+
+        <aside class="side">
+          <div class="card reveal">
+            <div class="muted">质检记录</div>
+            <div class="big-num">合格</div>
+            <div class="muted" style="margin-top:10px">最近：2025-11-16 08:10</div>
+          </div>
+          <div class="card reveal">
+            <div class="muted">上架门店</div>
+            <div class="big-num">商超 · A区</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+<script>
+/* ============================
+   1) 背景与前景视差（滚动 + 鼠标）
+   ============================ */
+const bg = document.getElementById('bg-layer');
+const tex = document.getElementById('texture-layer');
+const parts = document.getElementById('particles-layer');
+const glow = document.getElementById('glow');
+const fgCard = document.getElementById('fgCard');
+
+let lastScroll = 0;
+function onScrollParallax(){
+  const sc = window.scrollY;
+  // 滚动时不同层的移动幅度（越后面越慢）
+  bg.style.transform = `translate(-50%,-50%) translateY(${sc * 0.02}px) scale(1.02)`;
+  tex.style.transform = `translate(-50%,-50%) translateY(${sc * 0.035}px) scale(1.04)`;
+  parts.style.transform = `translate(-50%,-50%) translateY(${sc * 0.06}px) scale(1.06)`;
+  // 前景微浮动（让卡片有上浮错层）
+  const fgTranslate = Math.min(sc * -0.02, 0);
+  fgCard.style.transform = `translateZ(0) translateY(${fgTranslate}px)`;
+  lastScroll = sc;
+}
+window.addEventListener('scroll', () => requestAnimationFrame(onScrollParallax), {passive:true});
+
+/* 鼠标移动产生 3D 视差（桌面启用，移动端关闭） */
+let isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 1;
+if(!isTouch){
+  window.addEventListener('mousemove', e => {
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    const dx = (e.clientX - cx) / cx; // -1 .. 1
+    const dy = (e.clientY - cy) / cy;
+    // 背景慢移动
+    bg.style.transform += ` translateX(${dx * 8}px) translateY(${dy * 6}px)`;
+    // 轻微旋转卡片组
+    const tiltX = dy * 6; const tiltY = dx * -6;
+    fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+    // 光晕跟随
+    glow.style.transform = `translateX(${dx * 8}%) translateY(${dy * 18}%)`;
+    // 单独每个前景子项深度偏移
+    document.querySelectorAll('.fg-item').forEach(el=>{
+      const depth = parseFloat(el.dataset.depth)||30;
+      const moveX = dx * (depth/20);
+      const moveY = dy * (depth/40);
+      el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
+    });
+  });
+} else {
+  // 移动端优化：轻微根据倾斜和滚动做响应（不使用鼠标）
+  window.addEventListener('deviceorientation', ev => {
+    const rx = ev.beta || 0; // -180 .. 180
+    const ry = ev.gamma || 0;
+    const dx = Math.max(Math.min(ry/30, 1), -1);
+    const dy = Math.max(Math.min(rx/45, 1), -1);
+    glow.style.transform = `translateX(${dx * 8}%) translateY(${dy * 6}%)`;
+  }, {passive:true});
+}
+
+/* ============================
+   2) 进入动画（分层淡入 + stagger）
+   ============================ */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('show');
+      // 解除观察，避免重复触发
+      io.unobserve(entry.target);
+    }
+  });
+},{threshold:0.18});
+
+revealEls.forEach((el, i) => {
+  el.style.transitionDelay = (i*80) + 'ms';
+  io.observe(el);
+});
+
+/* ============================
+   3) 性能降级 & 防抖（resize）
+   ============================ */
+let resizeTO;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTO);
+  resizeTO = setTimeout(() => {
+    // 移动端隐藏鼠标驱动时的 transform 误差
+    if('ontouchstart' in window || navigator.maxTouchPoints > 1){
+      fgCard.style.transform = 'translateZ(0) translateY(0)';
+      document.querySelectorAll('.fg-item').forEach(el=> el.style.transform = 'none');
+    }
+  }, 120);
+});
+
+/* ============================
+   4) 小提示：可扩展为真实数据推送（示例）
+   ============================ */
+// 这里可插入 fetch() 调用真实后端 API，更新侧栏数值、前景图片或仪表
+// 示例（注释）：
+// fetch('/api/plot/2025-11-A12').then(r=>r.json()).then(data => { document.querySelector('.big-num').textContent = data.id; });
+
+</script>
 </body>
 </html>
