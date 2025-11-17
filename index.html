@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>智能农业溯源 — 视差演示 (主题一致性与修复版)</title>
+<title>智能农业溯源 — 视差演示 (主题统一版)</title>
 <style>
   /* 基础重置 */
   *{box-sizing:border-box;margin:0;padding:0}
@@ -11,7 +11,7 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,Helvetica,sans-serif;
     background:#04050a; 
-    color:#eef2f6; 
+    color:#f7fcff; /* 基础文字颜色使用亮色 */
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
     perspective:1000px; 
@@ -77,14 +77,16 @@
   }
 
   /* -----------------------------------
-     内容区块 (毛玻璃和对比度)
+     Hero 区块和侧边卡片 (与前景卡片统一主题)
      ----------------------------------- */
   .hero {
-    padding:28px; border-radius:16px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.08); 
+    /* 统一背景和边框，使用前景卡片风格 */
+    padding:28px; 
+    border-radius:16px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); /* 更亮、更透明的背景 */
+    border:1px solid rgba(255,255,255,0.12); /* 更清晰的边框 */
     box-shadow:0 12px 40px rgba(4,6,16,0.8); 
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px) saturate(1.1); /* 统一模糊和饱和度 */
     transform: translateZ(0); 
   }
 
@@ -93,24 +95,30 @@
     display:flex; flex-direction:column; gap:16px;
   }
   .card {
-    padding:16px; border-radius:14px; 
-    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); 
-    border:1px solid rgba(255,255,255,0.1); 
-    backdrop-filter: blur(10px);
+    /* 统一背景和边框，使用前景卡片风格 */
+    padding:18px; /* 统一内边距 */
+    border-radius:14px; 
+    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); /* 更亮、更透明的背景 */
+    border:1px solid rgba(255,255,255,0.12); /* 更清晰的边框 */
+    backdrop-filter: blur(12px) saturate(1.1);
     transform: translateZ(0); 
   }
   
   /* -----------------------------------
      字体和强调色 (高对比)
      ----------------------------------- */
-  h1.title, h2.title { /* 确保所有标题一致 */
-    font-size:clamp(30px,6.5vw,56px); line-height:1.02; margin-bottom:14px; letter-spacing:0.2px;
+  h1.title, h2.title { 
+    font-size:clamp(30px,6.5vw,56px); 
+    line-height:1.02; 
+    margin-bottom:20px; 
+    letter-spacing:0.2px;
     color:#e0f7ff; 
     text-shadow: 0 0 6px rgba(120, 220, 255, 0.4); 
     transform-origin:left center;
   }
-  .subtitle{ font-size:16px; opacity:0.95; margin-bottom:18px; max-width:54ch; }
+  .subtitle{ font-size:16px; opacity:0.95; margin-bottom:24px; max-width:54ch; }
 
+  .features{ display:flex; gap:12px; flex-wrap:wrap; margin-top:18px }
   .chip{ 
     background:rgba(0,150,255,0.1); 
     padding:10px 14px; 
@@ -129,7 +137,7 @@
   }
 
   /* -----------------------------------
-     前景 3D 卡片样式
+     前景 3D 卡片样式 (FG Item)
      ----------------------------------- */
   .fg-layer{
     position:relative; 
@@ -148,6 +156,7 @@
 
   .fg-item{
     flex:1; min-width:220px; border-radius:16px; padding:18px;
+    /* 样式与 hero/card 统一 */
     background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); 
     border:1px solid rgba(255,255,255,0.12); 
     backdrop-filter: blur(12px) saturate(1.1); 
@@ -164,7 +173,7 @@
   .fg-item p{font-size:14px;opacity:0.95;line-height:1.5} 
 
   /* -----------------------------------
-     动画和响应式
+     响应式
      ----------------------------------- */
   .reveal{ 
     opacity:0; 
@@ -181,6 +190,12 @@
     .fg-item{ width:100% }
     .fg-layer{ padding: 40px 0 60px; } 
     .parallax .layer{ width:160%; height:160% }
+    
+    /* 移动端间距优化 */
+    .hero { padding: 20px; }
+    h1.title, h2.title { margin-bottom: 12px; } 
+    .subtitle { margin-bottom: 18px; } 
+    .features { margin-top: 10px; }
   }
   @media (max-width:520px){
     h1.title{ font-size:28px }
@@ -236,13 +251,13 @@
       <div class="fg-card" id="fgCard" aria-hidden="false">
 
         <div class="fg-item" data-depth="40">
-          <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="农产品">
+          <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=60" alt="田间影像">
           <h3>田间影像</h3>
           <p>AI 摄像头自动抓拍，关键生长阶段图像可回放与比对。</p>
         </div>
 
         <div class="fg-item" data-depth="80">
-          <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=60" alt="地图">
+          <img src="https://images.unsplash.com/photo-1544377038-f9d6c42171c7?auto=format&fit=crop&w=900&q=60" alt="运输地图">
           <h3>运输地图</h3>
           <p>实时轨迹叠加地图，车辆与时序数据同步展示（示例）。</p>
         </div>
@@ -300,7 +315,7 @@
 
 <script>
 /* -----------------------------------------------------------
- * 视差效果和交互逻辑 (已优化性能和兼容性)
+ * 视差效果和交互逻辑 
  * ----------------------------------------------------------- */
 
 const Parallax = (() => {
@@ -321,7 +336,6 @@ const Parallax = (() => {
   const fgItems = document.querySelectorAll('.fg-item');
   const revealEls = document.querySelectorAll('.reveal');
 
-  /* 合并渲染：使用 requestAnimationFrame */
   function scheduleRender() {
     if (!state.ticking) {
       state.ticking = true;
@@ -332,7 +346,6 @@ const Parallax = (() => {
     }
   }
 
-  /* 计算并应用 transform (幂等) */
   function applyTransforms() {
     const sc = state.scrollY;
     const mx = state.mouseX;
@@ -351,13 +364,12 @@ const Parallax = (() => {
     const partsTranslateX = (mx * 16); 
     particlesLayer.style.transform = `translate(-50%,-50%) translateX(${partsTranslateX}px) translateY(${partsTranslateY}px) scale(1.06)`;
 
-    // 2. 前景卡片 (只在可见且非触摸设备上应用 3D 倾斜)
+    // 2. 前景卡片 3D 效果
     if (state.fgCardVisible && !state.isTouch) {
         const tiltX = (my * 6);   
         const tiltY = (mx * -6);  
         fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 
-        // 每个前景子项根据 depth 微偏移
         fgItems.forEach(el => {
             const depth = Number(el.dataset.depth) || 30;
             const moveX = mx * (depth / 30) * 12; 
@@ -365,7 +377,6 @@ const Parallax = (() => {
             el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
         });
     } else {
-        // 在不可见或触摸设备上，重置 transform
         fgCard.style.transform = `translateZ(0) rotateX(0deg) rotateY(0deg)`;
         fgItems.forEach(el => {
             const depth = Number(el.dataset.depth) || 30;
@@ -443,7 +454,6 @@ const Parallax = (() => {
   return { init };
 })();
 
-// 页面加载完毕后开始
 Parallax.init();
 </script>
 </body>
