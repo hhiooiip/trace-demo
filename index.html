@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>智能农业溯源 — 视差演示 (优化版)</title>
+<title>智能农业溯源 — 视差演示 (高对比版)</title>
 <style>
   /* 基础重置 */
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,Helvetica,sans-serif;
-    background:#04050a; color:#eef2f6;
+    background:#04050a; 
+    color:#eef2f6; /* 基础文字颜色略微提亮 */
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
-    perspective:1000px; /* 3D 效果基础 */
+    perspective:1000px; 
   }
 
   /* 固定视差舞台（多层背景） */
@@ -26,13 +27,14 @@
     width:140%; height:140%;
     transform-origin:center;
     background-repeat:no-repeat; background-position:center;
-    will-change:transform,opacity,filter;
+    will-change:transform; 
     filter:contrast(1.05) saturate(1.05);
   }
 
+  /* 背景渐变和颜色保持，但为整体提供深沉基调 */
   .layer.bg {
-    background-image: radial-gradient(ellipse at 10% 20%, rgba(20,30,60,0.22), transparent 10%),
-                      radial-gradient(ellipse at 90% 80%, rgba(10,60,90,0.12), transparent 20%),
+    background-image: radial-gradient(ellipse at 10% 20%, rgba(20,40,80,0.3), transparent 10%), /* 颜色更深 */
+                      radial-gradient(ellipse at 90% 80%, rgba(10,50,70,0.2), transparent 20%),
                       linear-gradient(180deg,#06101a 0%, #081219 50%, #071018 100%);
     opacity:1;
     transform: translate(-50%,-50%) scale(1.02);
@@ -40,23 +42,25 @@
 
   .layer.texture {
     background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=60');
-    opacity:0.14; mix-blend-mode:screen; filter: blur(4px) grayscale(0.1);
+    opacity:0.18; /* 略微提高纹理不透明度 */
+    mix-blend-mode:screen; filter: blur(3px) grayscale(0.05); /* 减少模糊 */
     transform: translate(-50%,-50%) scale(1.04);
   }
 
   .layer.particles {
     background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60');
-    opacity:0.1; mix-blend-mode:screen; filter: blur(6px) brightness(1.2);
+    opacity:0.15; /* 略微提高粒子不透明度 */
+    mix-blend-mode:screen; filter: blur(4px) brightness(1.4); /* 增加亮度 */
     transform: translate(-50%,-50%) scale(1.06);
   }
 
-  /* --- 关键优化：前景卡片跟随滚动 (移除 fixed) --- */
+  /* --- 前景卡片样式 --- */
   .fg-layer{
-    position:relative; /* 参与文档流，不再固定 */
+    position:relative; 
     width:100%; height:auto;
     display:flex; justify-content:center; align-items:center;
     pointer-events:none; z-index:2;
-    padding: 60px 0 80px; /* 增加上下间距 */
+    padding: 60px 0 80px; 
   }
   .fg-card{
     width:min(1100px,94%); max-width:1200px; pointer-events:auto;
@@ -68,29 +72,30 @@
 
   .fg-item{
     flex:1; min-width:220px; border-radius:16px; padding:18px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px) saturate(1.05);
-    box-shadow:0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-    color: #eaf3ff;
-    /* 优化: 确保 3D 上下文和 Z 深度 */
+    /* 优化: 卡片背景稍亮 */
+    background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); 
+    /* 优化: 边框更亮，对比度更强 */
+    border:1px solid rgba(255,255,255,0.12); 
+    backdrop-filter: blur(12px) saturate(1.1); /* 略微增加模糊和饱和度 */
+    box-shadow:0 12px 40px rgba(2,6,23,0.8), inset 0 1px 0 rgba(255,255,255,0.05); /* 阴影更重，内发光更明显 */
+    color: #f7fcff; /* 基础文字提亮 */
     transform: translateZ(0); 
   }
-  /* 设置基础 Z 深度，JS 会增加 X/Y 视差 */
   .fg-item[data-depth="20"] { transform: translateZ(20px); }
   .fg-item[data-depth="40"] { transform: translateZ(40px); }
   .fg-item[data-depth="80"] { transform: translateZ(80px); }
 
   .fg-item img{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:12px}
   .fg-item h3{font-size:18px;margin-bottom:8px}
-  .fg-item p{font-size:14px;opacity:0.85;line-height:1.5}
+  .fg-item p{font-size:14px;opacity:0.95;line-height:1.5} /* 段落文字更清晰 */
 
   .glow {
-    position:fixed; z-index:-5; width:60vmax; height:60vmax; left:50%; top:10%;
-    transform:translateX(-50%) translateY(-10%);
-    background: radial-gradient(circle at 30% 30%, rgba(0,200,230,0.14), rgba(0,120,200,0.06) 18%, transparent 35%),
-                radial-gradient(circle at 70% 70%, rgba(120,60,255,0.08), transparent 25%);
-    filter: blur(40px) saturate(1.2);
+    position:fixed; z-index:-5; width:70vmax; height:70vmax; left:50%; top:10%; /* 尺寸略微增大 */
+    transform:translateX(-50%) translateY(-10%) translateZ(0); 
+    /* 优化: 调整颜色为高对比的青蓝/紫组合，并增强不透明度 */
+    background: radial-gradient(circle at 30% 30%, rgba(0,220,255,0.2), rgba(0,100,200,0.1) 18%, transparent 35%),
+                radial-gradient(circle at 70% 70%, rgba(180,80,255,0.15), transparent 25%);
+    filter: blur(50px) saturate(1.8); /* 增加模糊和饱和度 */
     mix-blend-mode:screen; pointer-events:none;
     will-change:transform;
   }
@@ -106,58 +111,69 @@
     width:min(1200px,94%); margin:0 auto; display:grid; grid-template-columns:1fr 420px; gap:36px; align-items:start;
   }
 
-  /* 优化: 为所有包含 backdrop-filter 的元素强制 3D 上下文 */
   .hero {
     padding:28px; border-radius:16px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.04);
-    box-shadow:0 12px 40px rgba(4,6,16,0.6);
+    background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.08); /* 边框更明显 */
+    box-shadow:0 12px 40px rgba(4,6,16,0.8); /* 阴影更重 */
     backdrop-filter: blur(10px);
-    transform: translateZ(0); /* 性能优化 */
+    transform: translateZ(0); 
   }
 
+  /* 优化: 主标题使用高亮颜色 */
   h1.title{
     font-size:clamp(30px,6.5vw,56px); line-height:1.02; margin-bottom:14px; letter-spacing:0.2px;
-    color:#f7fbff;
+    color:#e0f7ff; /* 亮青白色 */
+    text-shadow: 0 0 6px rgba(120, 220, 255, 0.4); /* 增加微弱光晕效果 */
     transform-origin:left center;
   }
-  .subtitle{ font-size:16px; opacity:0.86; margin-bottom:18px; max-width:54ch; }
+  .subtitle{ font-size:16px; opacity:0.95; margin-bottom:18px; max-width:54ch; } /* 小标题更清晰 */
 
   .features{ display:flex; gap:12px; flex-wrap:wrap; margin-top:18px }
-  /* 优化: 芯片样式增加对比度 */
+  /* 优化: 芯片样式更亮 */
   .chip{ 
-    background:rgba(255,255,255,0.06); 
+    background:rgba(0,150,255,0.1); /* 增加蓝色调背景 */
     padding:10px 14px; 
     border-radius:999px; 
     font-size:13px; 
-    border:1px solid rgba(255,255,255,0.08); 
-    color: #c5e7ff; 
-    box-shadow: 0 0 4px rgba(0,200,230,0.2); 
+    border:1px solid rgba(0,180,255,0.3); /* 亮蓝色边框 */
+    color: #99eaff; /* 鲜艳的青色文字 */
+    box-shadow: 0 0 8px rgba(0,150,255,0.3); /* 增强光晕 */
   }
 
   .side {
     position:relative;
     display:flex; flex-direction:column; gap:16px;
   }
-  /* 优化: 为所有包含 backdrop-filter 的元素强制 3D 上下文 */
   .card {
-    padding:16px; border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.04); backdrop-filter: blur(10px);
-    transform: translateZ(0); /* 性能优化 */
+    padding:16px; border-radius:14px; 
+    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); /* 卡片背景略微增亮 */
+    border:1px solid rgba(255,255,255,0.1); /* 边框更明显 */
+    backdrop-filter: blur(10px);
+    transform: translateZ(0); 
   }
-  .muted{ color:rgba(230,240,255,0.7); font-size:14px; opacity:0.9 }
-  .big-num{ font-size:28px; font-weight:700; color:#eaffff }
+  .muted{ color:rgba(230,240,255,0.85); font-size:14px; opacity:1; } /* 辅助文字更清晰 */
+  /* 优化: 大数字使用高对比强调色 */
+  .big-num{ 
+    font-size:28px; font-weight:700; 
+    color:#00eaff; /* 鲜艳的电光蓝 */
+    text-shadow: 0 0 4px rgba(0, 234, 255, 0.6);
+  }
 
-  .reveal{ opacity:0; transform:translateY(18px); transition:all 700ms cubic-bezier(.2,.9,.3,1); }
+  .reveal{ 
+    opacity:0; 
+    transform:translateY(18px); 
+    transition:all 500ms cubic-bezier(.2,.9,.3,1); 
+  }
   .reveal.show{ opacity:1; transform:none; }
 
-  .hint { margin-top:14px; font-size:13px; color:rgba(230,240,255,0.6) }
+  .hint { margin-top:14px; font-size:13px; color:rgba(230,240,255,0.7) }
 
   @media (max-width:900px){
     .wrap{ grid-template-columns:1fr; }
     .fg-card{ flex-direction:column; align-items:center; gap:14px }
     .fg-item{ width:100% }
-    .fg-layer{ padding: 40px 0 60px; } /* 调整移动端间距 */
+    .fg-layer{ padding: 40px 0 60px; } 
     .parallax .layer{ width:160%; height:160% }
   }
   @media (max-width:520px){
@@ -226,7 +242,7 @@
         </div>
 
         <div class="fg-item" data-depth="20">
-          <img src="https://images.unsplash.com/photo-1581092334474-8f8c6f2c6baf?auto=format&fit=crop&w=900&q=60" alt="AI 图">
+          <img src="https://images.unsplash.com/photo-1533285743846-511593c24b17?auto=format&fit=crop&w=900&q=60" alt="AI 诊断">
           <h3>AI 诊断</h3>
           <p>模型推断作物健康与病害风险，提供处理建议与历史对比。</p>
         </div>
@@ -287,7 +303,7 @@ const Parallax = (() => {
     mouseY: 0, // -1 .. 1
     isTouch: ('ontouchstart' in window) || navigator.maxTouchPoints > 1,
     ticking: false,
-    fgCardVisible: false // 新增：用于判断前景卡片是否可见，以便开启 3D 效果
+    fgCardVisible: false 
   };
 
   const bgLayer = document.getElementById('bg-layer');
@@ -315,24 +331,23 @@ const Parallax = (() => {
     const mx = state.mouseX;
     const my = state.mouseY;
 
-    // 1. 背景层：基于滚动 + 鼠标偏移
-    const bgTranslateY = sc * 0.02 + (my * 6);
-    const bgTranslateX = (mx * 8);
+    // 1. 背景层：基于滚动 + 鼠标偏移 
+    const bgTranslateY = sc * 0.02 + (my * 4); 
+    const bgTranslateX = (mx * 6); 
     bgLayer.style.transform = `translate(-50%,-50%) translateX(${bgTranslateX}px) translateY(${bgTranslateY}px) scale(1.02)`;
 
-    const texTranslateY = sc * 0.035 + (my * 10);
-    const texTranslateX = (mx * 12);
+    const texTranslateY = sc * 0.035 + (my * 8); 
+    const texTranslateX = (mx * 10); 
     textureLayer.style.transform = `translate(-50%,-50%) translateX(${texTranslateX}px) translateY(${texTranslateY}px) scale(1.04)`;
 
-    const partsTranslateY = sc * 0.06 + (my * 18);
-    const partsTranslateX = (mx * 20);
+    const partsTranslateY = sc * 0.06 + (my * 14); 
+    const partsTranslateX = (mx * 16); 
     particlesLayer.style.transform = `translate(-50%,-50%) translateX(${partsTranslateX}px) translateY(${partsTranslateY}px) scale(1.06)`;
 
     // 2. 前景卡片 (只在可见且非触摸设备上应用 3D 倾斜)
     if (state.fgCardVisible && !state.isTouch) {
-        const tiltX = (my * 6);   // rotateX
-        const tiltY = (mx * -6);  // rotateY
-        // 移除滚动相关的 translateY 效果
+        const tiltX = (my * 6);   
+        const tiltY = (mx * -6);  
         fgCard.style.transform = `translateZ(0) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 
         // 每个前景子项根据 depth 微偏移
@@ -340,34 +355,30 @@ const Parallax = (() => {
             const depth = Number(el.dataset.depth) || 30;
             const moveX = mx * (depth / 30) * 12; 
             const moveY = my * (depth / 60) * 8;
-            // 使用 translateZ() 确保 3D 上下文，并应用 X/Y 偏移
             el.style.transform = `translateZ(${depth}px) translate(${moveX}px, ${moveY}px)`;
         });
     } else {
-        // 在不可见或触摸设备上，重置 transform，只保留 CSS 中设置的 translateZ
+        // 在不可见或触摸设备上，重置 transform
         fgCard.style.transform = `translateZ(0) rotateX(0deg) rotateY(0deg)`;
         fgItems.forEach(el => {
             const depth = Number(el.dataset.depth) || 30;
-            // 确保 translateZ 恢复到初始值
             el.style.transform = `translateZ(${depth}px)`;
         });
     }
 
-    // 3. 光晕跟随
-    const glowX = mx * 8; 
-    const glowY = my * 18;
-    glow.style.transform = `translateX(-50%) translateY(-10%) translateX(${glowX}%) translateY(${glowY}%)`;
+    // 3. 光晕跟随 
+    const glowX = mx * 6; 
+    const glowY = my * 14; 
+    glow.style.transform = `translateX(-50%) translateY(-10%) translateX(${glowX}%) translateY(${glowY}%) translateZ(0)`;
   }
 
   /* 初始化事件监听器 */
   function initListeners() {
-    // 滚动监听 (被动)
     window.addEventListener('scroll', () => {
       state.scrollY = window.scrollY || window.pageYOffset || 0;
       scheduleRender();
     }, {passive: true});
 
-    // 鼠标移动监听：只在非触摸设备启用
     if (!state.isTouch) {
       window.addEventListener('mousemove', e => {
         const cx = window.innerWidth / 2;
@@ -396,32 +407,29 @@ const Parallax = (() => {
     });
   }
 
-  /* IntersectionObserver for 3D Card Activation (性能优化) */
+  /* IntersectionObserver for 3D Card Activation */
   function initCardObserver() {
     const cardIO = new IntersectionObserver((entries) => {
       state.fgCardVisible = entries[0].isIntersecting;
-      // 当卡片离开/进入视口时，重新渲染以确保 transform 状态正确
       scheduleRender(); 
     }, {
       rootMargin: '0px',
-      threshold: 0.05 // 只要卡片有 5% 进入视口即激活 3D 效果
+      threshold: 0.05 
     });
 
     if (fgCard) {
-      cardIO.observe(fgCard.parentNode); // 观察 .fg-layer
+      cardIO.observe(fgCard.parentNode); 
     }
   }
 
   /* 初始化所有功能 */
   function init() {
-    // 初始状态设置
     state.scrollY = window.scrollY || 0;
     
     initListeners();
     initRevealEffect();
     initCardObserver();
 
-    // 初始渲染一次
     scheduleRender(); 
   }
 
