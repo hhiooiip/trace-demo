@@ -3,170 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYSTEM: AI_INTRO // 2024</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>神经网络 // 2024结课档案</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-green: #0f0;
+            --neon-dark-green: #003300;
             --neon-cyan: #0ff;
             --neon-pink: #f0f;
-            --dark-bg: #050505;
-            --glass-bg: rgba(10, 20, 10, 0.7);
+            --bg-color: #050505;
+            --card-bg: rgba(0, 20, 0, 0.85);
+            --border-color: #33ff33;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--dark-bg);
+            background-color: var(--bg-color);
             color: var(--neon-green);
-            font-family: 'Share Tech Mono', monospace; /* 核心黑客字体 */
+            font-family: 'Share Tech Mono', 'Noto Sans SC', monospace;
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        /* 背景画布：代码雨 */
+        /* CRT 扫描线特效 - 增加复古显示器质感 */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
         canvas#matrix {
             position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; z-index: -1;
+            width: 100%; height: 100%;
         }
 
-        a { text-decoration: none; color: inherit; }
+        /* 滚动条样式 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-green); }
 
-        /* 导航栏 */
+        /* 导航 */
         nav {
             position: fixed;
-            top: 0;
-            width: 100%;
+            top: 0; width: 100%;
             padding: 1rem 2rem;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             border-bottom: 1px solid var(--neon-green);
             z-index: 100;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             backdrop-filter: blur(5px);
         }
         .logo { 
             font-size: 1.5rem; 
-            text-shadow: 0 0 10px var(--neon-green);
-            animation: blink 2s infinite;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--neon-green);
         }
-        
-        /* 容器 */
+        .nav-links a {
+            margin-left: 20px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            opacity: 0.7;
+        }
+        .nav-links a:hover { color: var(--neon-cyan); opacity: 1; text-shadow: 0 0 8px var(--neon-cyan); }
+
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* Hero 区域 */
+        /* Header 区域 */
         header {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            position: relative;
+            padding-top: 60px;
         }
 
-        /* 故障文字特效 */
+        .glitch-wrapper { position: relative; display: inline-block; }
         .glitch {
-            font-size: 4rem;
-            font-weight: bold;
-            position: relative;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
             color: white;
-            text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan);
-            animation: glitch-anim 1s infinite linear alternate-reverse;
-        }
-
-        .subtitle {
-            margin-top: 20px;
-            font-size: 1.5rem;
-            color: var(--neon-cyan);
-            border-right: 2px solid var(--neon-cyan);
-            white-space: nowrap;
-            overflow: hidden;
-            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
-            max-width: 100%;
-            display: inline-block;
-        }
-
-        /* 按钮 */
-        .cyber-btn {
-            margin-top: 50px;
-            padding: 15px 40px;
-            background: transparent;
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            font-size: 1.2rem;
-            font-family: 'Share Tech Mono', monospace;
-            cursor: pointer;
+            text-transform: uppercase;
             position: relative;
-            overflow: hidden;
+            text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+            letter-spacing: 5px;
+        }
+
+        .sub-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            background: rgba(0,0,0,0.6);
+            padding: 5px 15px;
+            border-left: 3px solid var(--neon-cyan);
+            max-width: 800px;
+        }
+
+        .btn-group { margin-top: 3rem; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .cyber-btn {
+            padding: 15px 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            font-size: 1.1rem;
+            cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 15px var(--neon-green);
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            font-weight: bold;
         }
         .cyber-btn:hover {
             background: var(--neon-green);
             color: black;
-            box-shadow: 0 0 50px var(--neon-green);
+            box-shadow: 0 0 30px var(--neon-green);
         }
-
-        /* 板块通用 */
-        section { padding: 100px 0; border-top: 1px dashed #333; }
-        h2 {
-            font-size: 2.5rem;
-            margin-bottom: 50px;
+        /* 红色按钮变体 */
+        .cyber-btn.alert {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+        .cyber-btn.alert:hover {
+            background: var(--neon-pink);
             color: white;
-            text-align: center;
-            text-transform: uppercase;
+            box-shadow: 0 0 30px var(--neon-pink);
         }
-        h2::before { content: ">> "; color: var(--neon-pink); }
-        h2::after { content: " <<"; color: var(--neon-pink); }
 
-        /* 卡片样式 */
-        .card-grid {
+        /* 通用板块 */
+        section { padding: 80px 0; position: relative; }
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 60px;
+            border-bottom: 2px solid var(--neon-dark-green);
+            display: inline-block;
+            padding-right: 50px;
+            position: relative;
+        }
+        .section-title::after {
+            content: ' // SYSTEM_CHECK';
+            font-size: 1rem;
+            color: #555;
+            position: absolute;
+            right: 0; bottom: 5px;
+        }
+
+        /* 技能条 */
+        .skill-box { margin-bottom: 20px; }
+        .skill-name { display: flex; justify-content: space-between; margin-bottom: 5px; color: #ccc; }
+        .progress-bar {
+            height: 12px;
+            background: #111;
+            border: 1px solid #333;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--neon-green);
+            width: 0; /* JS控制 */
+            box-shadow: 0 0 10px var(--neon-green);
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* 项目网格 */
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
         }
-        .cyber-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--neon-green);
-            padding: 20px;
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            padding: 25px;
             position: relative;
             transition: 0.3s;
+            overflow: hidden;
         }
-        /* 卡片四角装饰 */
-        .cyber-card::before {
-            content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; 
-            border-top: 2px solid var(--neon-cyan); border-left: 2px solid var(--neon-cyan);
-        }
-        .cyber-card::after {
-            content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; 
-            border-bottom: 2px solid var(--neon-cyan); border-right: 2px solid var(--neon-cyan);
-        }
-        .cyber-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+        .card:hover {
             border-color: var(--neon-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
         }
-        
-        .card-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
-        .card-title { font-size: 1.5rem; color: var(--neon-cyan); margin-bottom: 10px; }
-        .card-desc { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
-        .status { 
-            display: inline-block; margin-top: 15px; padding: 5px 10px; 
-            background: rgba(0, 255, 255, 0.1); border: 1px solid var(--neon-cyan); 
+        .card h3 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 1.4rem; }
+        .card p { color: #aaa; font-size: 0.95rem; margin-bottom: 15px; }
+        .tags span {
+            display: inline-block;
+            font-size: 0.75rem;
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 2px 8px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+        .card:hover::before { transform: translateX(100%); }
+
+        /* 终端日志风格 */
+        .terminal {
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #555;
+            padding: 20px;
+            font-family: monospace;
+            border-left: 5px solid var(--neon-green);
+        }
+        .log-entry { margin-bottom: 10px; color: #ddd; }
+        .log-time { color: var(--neon-green); margin-right: 10px; }
+        .log-cmd { color: var(--neon-cyan); font-weight: bold; }
+
+        /* 演化路径 (时间轴) */
+        .timeline { border-left: 2px solid #333; margin-left: 20px; padding-left: 30px; }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -36px; top: 5px;
+            width: 10px; height: 10px; background: black;
+            border: 2px solid var(--neon-green); border-radius: 50%;
+        }
+        .timeline-date { color: var(--neon-pink); font-size: 0.9rem; margin-bottom: 5px; }
+        .timeline-content h4 { color: white; margin-bottom: 5px; }
+        .timeline-content p { color: #888; font-size: 0.9rem; }
+
+        /* 页脚 */
+        footer {
+            border-top: 1px solid #333;
+            padding: 3rem 0;
+            text-align: center;
+            background: #020202;
             font-size: 0.8rem;
+            color: #555;
         }
 
-        /* 动画定义 */
+        /* 动画关键帧 */
         @keyframes glitch-anim {
             0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
             25% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
@@ -174,139 +261,230 @@
             75% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-cyan); }
             100% { text-shadow: 1px 1px var(--neon-pink), -1px -1px var(--neon-cyan); }
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes typing { from { width: 0 } to { width: 100% } }
-        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--neon-cyan); } }
 
-        /* 手机适配 */
         @media (max-width: 768px) {
-            .glitch { font-size: 2.5rem; }
-            .subtitle { font-size: 1rem; white-space: normal; border: none; animation: none; }
-            nav { padding: 1rem; }
+            .glitch { font-size: 3rem; }
+            .nav-links { display: none; }
+            .section-title { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
     <canvas id="matrix"></canvas>
+    <div class="scanlines"></div>
 
     <nav>
-        <div class="logo">SYSTEM.ROOT</div>
-        <div style="font-size: 0.8rem; padding-top:5px;">[CONNECTED]</div>
+        <div class="logo">&lt;AI_导论 /&gt;</div>
+        <div class="nav-links">
+            <a href="#skills">能力图谱</a>
+            <a href="#projects">核心交付</a>
+            <a href="#timeline">演化路径</a>
+        </div>
     </nav>
 
     <header>
         <div class="container">
-            <div class="glitch" data-text="AI_INTRO_2024">AI_INTRO_2024</div>
-            <div class="subtitle">INITIALIZING NEURAL NETWORKS... ACCESS GRANTED.</div>
-            <br>
-            <button class="cyber-btn" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
-                ENTER_SYSTEM
-            </button>
+            <div style="font-size: 1.2rem; color: var(--neon-green); margin-bottom: 10px; letter-spacing: 3px;">
+                SYSTEM: ONLINE // 2024_FALL
+            </div>
+            <div class="glitch-wrapper">
+                <div class="glitch" data-text="人工智能">人工智能</div>
+            </div>
+            <div class="glitch-wrapper">
+                <div class="glitch" data-text="结课档案" style="color: var(--neon-cyan); font-size: clamp(2rem, 6vw, 4rem);">结课档案</div>
+            </div>
+            
+            <div class="sub-text">
+                > 正在加载神经元权重... <br>
+                > 从感知到认知，我们用代码重构世界的逻辑。
+            </div>
+
+            <div class="btn-group">
+                <a href="#projects" class="cyber-btn">查看实战成果</a>
+                <a href="https://github.com/" target="_blank" class="cyber-btn alert">访问源代码库</a>
+            </div>
         </div>
     </header>
 
-    <section id="projects">
+    <section id="about">
         <div class="container">
-            <h2>DEPLOYED_MODULES</h2>
-            <div class="card-grid">
-                
-                <div class="cyber-card">
-                    <span class="card-icon">👾</span>
-                    <h3 class="card-title">Auto_Solver.exe</h3>
-                    <p class="card-desc">基于 A* 启发式搜索算法的迷宫自动寻路系统。逻辑即正义。</p>
-                    <div class="status">STATUS: OPTIMIZED</div>
+            <h2 class="section-title">终端日志</h2>
+            <div class="terminal">
+                <div class="log-entry">
+                    <span class="log-time">[10:24:01]</span> <span class="log-cmd">whoami</span>
+                    <br> >> 学生开发者 / 深度学习探索者
                 </div>
-
-                <div class="cyber-card">
-                    <span class="card-icon">👁️</span>
-                    <h3 class="card-title">Vision_Core_v1</h3>
-                    <p class="card-desc">MNIST 卷积神经网络。它能看懂你写的每一个数字，准确率 99.2%。</p>
-                    <div class="status">STATUS: TRAINED</div>
+                <div class="log-entry">
+                    <span class="log-time">[10:24:02]</span> <span class="log-cmd">cat mission.txt</span>
+                    <br> >> 任务目标：解构智能本质。
+                    <br> >> 在为期16周的《人工智能导论》中，我们跨越了传统的符号逻辑，深入到数据驱动的神经网络。
+                    <br> >> 警告：思维模型已永久更新。
                 </div>
-
-                <div class="cyber-card">
-                    <span class="card-icon">🧠</span>
-                    <h3 class="card-title">Chat_Bot_Beta</h3>
-                    <p class="card-desc">基于 Transformer 的自然语言处理模型。小心，它可能通过图灵测试。</p>
-                    <div class="status">STATUS: ONLINE</div>
+                <div class="log-entry">
+                    <span class="log-time">[10:24:05]</span> <span class="log-cmd">status_check</span>
+                    <br> >> <span style="color:var(--neon-green)">Ready to deploy.</span>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <section>
+    <section id="skills">
         <div class="container">
-            <h2>SYSTEM_LOGS</h2>
-            <div style="border-left: 2px solid var(--neon-green); padding-left: 20px; margin-left: 10px;">
-                <div style="margin-bottom: 20px;">
-                    <div style="color: var(--neon-pink);">[LOG_001] >> LOADING_KNOWLEDGE</div>
-                    <p style="color: #888;">> Learned: Python, NumPy, Pandas</p>
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <div style="color: var(--neon-pink);">[LOG_002] >> PROCESSING_ALGORITHMS</div>
-                    <p style="color: #888;">> Executed: Linear Regression, K-Means</p>
+            <h2 class="section-title">算力 / 技术栈</h2>
+            <div class="grid">
+                <div>
+                    <div class="skill-box">
+                        <div class="skill-name"><span>Python / NumPy / Pandas</span> <span>95%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 95%"></div></div>
+                    </div>
+                    <div class="skill-box">
+                        <div class="skill-name"><span>Machine Learning (Scikit-learn)</span> <span>80%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 80%"></div></div>
+                    </div>
                 </div>
                 <div>
-                    <div style="color: var(--neon-pink);">[LOG_003] >> DEPLOYING_NETWORKS</div>
-                    <p style="color: #888;">> Built: PyTorch MLP, CNN Models</p>
+                    <div class="skill-box">
+                        <div class="skill-name"><span>Deep Learning (PyTorch)</span> <span>65%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 65%; background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink);"></div></div>
+                    </div>
+                    <div class="skill-box">
+                        <div class="skill-name"><span>LLM / Prompt Engineering</span> <span>70%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 70%; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);"></div></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer style="text-align: center; padding: 2rem; border-top: 1px solid var(--neon-green); background: black;">
-        <p style="font-size: 0.8rem; color: #555;">END_OF_LINE // © 2024 CYBER_CLASS</p>
+    <section id="projects">
+        <div class="container">
+            <h2 class="section-title">核心交付物</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>01 // 迷宫博弈智能体</h3>
+                    <p>基于 A* 启发式搜索算法与 Minimax 策略。在这个项目中，我们并未赋予机器“意识”，而是赋予了它“逻辑”。它能在毫秒级时间内计算出迷宫的最优逃逸路径。</p>
+                    <div class="tags">
+                        <span>搜索算法</span> <span>Game AI</span> <span>Python</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>02 // 视觉中枢构建</h3>
+                    <p>基于 PyTorch 构建卷积神经网络 (CNN)。训练模型识别 MNIST 手写数字数据集。这是机器第一次拥有了“眼睛”，准确率突破 99.2%。</p>
+                    <div class="tags">
+                        <span>计算机视觉</span> <span>PyTorch</span> <span>深度学习</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>03 // 房价预测预言机</h3>
+                    <p>利用波士顿房价数据集，使用线性回归与随机森林算法。从历史数据的噪点中寻找数学规律，实现对未来的量化预测。</p>
+                    <div class="tags">
+                        <span>数据挖掘</span> <span>Scikit-learn</span> <span>回归分析</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>04 // 语言大模型微调</h3>
+                    <p>调用 OpenAI API 并结合 LangChain 框架，构建了一个垂直领域的知识问答助手。探索了 Prompt Engineering 的边界。</p>
+                    <div class="tags">
+                        <span>NLP</span> <span>LLM</span> <span>AIGC</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <div class="container">
+            <h2 class="section-title">演化路径</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">PHASE 01. 初始引导</div>
+                    <div class="timeline-content">
+                        <h4>环境配置与 Python 进阶</h4>
+                        <p>安装 Anaconda，配置 PyCharm。掌握 NumPy 矩阵运算，为后续的数学推导打下地基。</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">PHASE 02. 符号主义</div>
+                    <div class="timeline-content">
+                        <h4>搜索与逻辑</h4>
+                        <p>学习 BFS/DFS 盲目搜索与 A* 启发式搜索。理解早期人工智能如何通过规则解决问题。</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">PHASE 03. 连接主义</div>
+                    <div class="timeline-content">
+                        <h4>机器学习与神经网络</h4>
+                        <p>理解反向传播(Back Propagation)与梯度下降。亲手推导损失函数，模型开始具备“学习”能力。</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">PHASE 04. 生成式未来</div>
+                    <div class="timeline-content">
+                        <h4>结课与展望</h4>
+                        <p>完成了最终的小组项目。虽然课程结束了，但通往 AGI (通用人工智能) 的道路才刚刚开始。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>SYSTEM STATUS: HIBERNATION MODE</p>
+            <p style="margin-top: 10px; opacity: 0.5;">&copy; 2024 AI Course Showcase. Built with pure logic.</p>
+        </div>
     </footer>
 
     <script>
+        // 矩阵代码雨
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
 
-        // 设置全屏
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // 黑客帝国字符集
-        const chars = '01010101ABCDEFGHIJKLMNOPQRSTUVWXYZアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ人工智能数据算力网络矩阵';
         const charArray = chars.split('');
-
         const fontSize = 14;
         const columns = canvas.width / fontSize;
-
-        // 每一列的掉落位置
         const drops = [];
-        for(let x = 0; x < columns; x++) {
-            drops[x] = 1;
-        }
+
+        for(let x = 0; x < columns; x++) { drops[x] = 1; }
 
         function draw() {
-            // 黑色背景，透明度产生拖尾效果
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#0F0'; // 绿色文字
+            ctx.fillStyle = '#0F0'; 
             ctx.font = fontSize + 'px monospace';
 
             for(let i = 0; i < drops.length; i++) {
                 const text = charArray[Math.floor(Math.random() * charArray.length)];
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                // 随机重置回顶部
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975)
-                    drops[i] = 0;
-
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             }
         }
-
         setInterval(draw, 33);
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 
-        // 窗口大小改变时重置
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // 简单的页面入场动画
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            cards.forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
         });
     </script>
 </body>
