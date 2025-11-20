@@ -1,132 +1,313 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>智能农业溯源</title>
-<style>
-/* -------- 基础重置 -------- */
-*{margin:0;padding:0;box-sizing:border-box}
-body,html{height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro","Noto Sans SC",Roboto,sans-serif;background:#04050a;color:#f7fcff;overflow-x:hidden}
-img{display:block;width:100%;border-radius:10px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM: AI_INTRO // 2024</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #0f0;
+            --neon-cyan: #0ff;
+            --neon-pink: #f0f;
+            --dark-bg: #050505;
+            --glass-bg: rgba(10, 20, 10, 0.7);
+        }
 
-/* -------- 背景与光晕 -------- */
-.bg-layer{position:fixed;inset:0;z-index:-2;background:linear-gradient(180deg,#06101a,#081219 50%,#071018 100%);will-change:transform}
-.glow{position:fixed;top:15%;left:50%;width:60vmax;height:60vmax;background:radial-gradient(circle at 30% 30%,rgba(0,200,255,0.2),transparent 35%),radial-gradient(circle at 70% 70%,rgba(180,80,255,0.15),transparent 25%);filter:blur(50px);mix-blend-mode:screen;transform:translateX(-50%) translateY(-15%);z-index:-1}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* -------- 布局 -------- */
-section{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 20px}
-.wrap{display:grid;grid-template-columns:1fr 300px;gap:20px;max-width:1100px;width:94%}
-@media(max-width:800px){.wrap{grid-template-columns:1fr}}
-@media(max-width:500px){.wrap{grid-template-columns:1fr;gap:16px}}
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace; /* 核心黑客字体 */
+            overflow-x: hidden;
+        }
 
-/* -------- 卡片玻璃质感 -------- */
-.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;box-shadow:0 12px 32px rgba(0,0,0,0.6);transition:transform 0.3s ease,opacity 0.6s ease}
-.card h1,h2,h3{color:#00eaff;margin-bottom:12px}
-.card p{font-size:14px;opacity:0.9;line-height:1.4}
+        /* 背景画布：代码雨 */
+        canvas#matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+        }
 
-/* -------- 前景卡片 3D -------- */
-.fg-layer{display:flex;gap:20px;justify-content:center;align-items:center;perspective:1200px;margin-top:40px}
-.fg-item{flex:1;transform-style:preserve-3d;transition:transform 0.3s,opacity 0.6s;opacity:0;transform:translateY(20px)}
-.fg-item.show{opacity:1;transform:translateY(0)}
+        a { text-decoration: none; color: inherit; }
 
-/* -------- 渐入动画 -------- */
-.fade{opacity:0;transform:translateY(20px);transition:all 0.6s ease-out}
-.fade.show{opacity:1;transform:translateY(0)}
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid var(--neon-green);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            backdrop-filter: blur(5px);
+        }
+        .logo { 
+            font-size: 1.5rem; 
+            text-shadow: 0 0 10px var(--neon-green);
+            animation: blink 2s infinite;
+        }
+        
+        /* 容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-/* -------- 响应式 -------- */
-@media(max-width:600px){
-  .fg-layer{flex-direction:column;align-items:center}
-  .fg-item{width:90%}
-}
-</style>
+        /* Hero 区域 */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        /* 故障文字特效 */
+        .glitch {
+            font-size: 4rem;
+            font-weight: bold;
+            position: relative;
+            color: white;
+            text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan);
+            animation: glitch-anim 1s infinite linear alternate-reverse;
+        }
+
+        .subtitle {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            border-right: 2px solid var(--neon-cyan);
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+            max-width: 100%;
+            display: inline-block;
+        }
+
+        /* 按钮 */
+        .cyber-btn {
+            margin-top: 50px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+        .cyber-btn:hover {
+            background: var(--neon-green);
+            color: black;
+            box-shadow: 0 0 50px var(--neon-green);
+        }
+
+        /* 板块通用 */
+        section { padding: 100px 0; border-top: 1px dashed #333; }
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: white;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        h2::before { content: ">> "; color: var(--neon-pink); }
+        h2::after { content: " <<"; color: var(--neon-pink); }
+
+        /* 卡片样式 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .cyber-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--neon-green);
+            padding: 20px;
+            position: relative;
+            transition: 0.3s;
+        }
+        /* 卡片四角装饰 */
+        .cyber-card::before {
+            content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; 
+            border-top: 2px solid var(--neon-cyan); border-left: 2px solid var(--neon-cyan);
+        }
+        .cyber-card::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; 
+            border-bottom: 2px solid var(--neon-cyan); border-right: 2px solid var(--neon-cyan);
+        }
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            border-color: var(--neon-cyan);
+        }
+        
+        .card-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .card-title { font-size: 1.5rem; color: var(--neon-cyan); margin-bottom: 10px; }
+        .card-desc { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
+        .status { 
+            display: inline-block; margin-top: 15px; padding: 5px 10px; 
+            background: rgba(0, 255, 255, 0.1); border: 1px solid var(--neon-cyan); 
+            font-size: 0.8rem;
+        }
+
+        /* 动画定义 */
+        @keyframes glitch-anim {
+            0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
+            25% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
+            50% { text-shadow: 2px -2px var(--neon-pink), -2px 2px var(--neon-cyan); }
+            75% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-cyan); }
+            100% { text-shadow: 1px 1px var(--neon-pink), -1px -1px var(--neon-cyan); }
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--neon-cyan); } }
+
+        /* 手机适配 */
+        @media (max-width: 768px) {
+            .glitch { font-size: 2.5rem; }
+            .subtitle { font-size: 1rem; white-space: normal; border: none; animation: none; }
+            nav { padding: 1rem; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="bg-layer"></div>
-<div class="glow"></div>
+    <canvas id="matrix"></canvas>
 
-<main>
-  <!-- Hero 区 -->
-  <section>
-    <div class="wrap">
-      <div class="card fade">
-        <h1>智能农业溯源系统</h1>
-        <p>集合 AI 摄像、环境传感、物流追踪与二维码溯源，提供端到端数据可信链。</p>
-      </div>
-      <div class="card fade">
-        <h3>当前地块</h3>
-        <p>PLOT-2025-11-A12</p>
-        <p>采摘时间：2025-11-16 07:30</p>
-      </div>
-    </div>
-  </section>
+    <nav>
+        <div class="logo">SYSTEM.ROOT</div>
+        <div style="font-size: 0.8rem; padding-top:5px;">[CONNECTED]</div>
+    </nav>
 
-  <!-- 前景卡片 3D -->
-  <section class="fg-layer">
-    <div class="fg-item card fade" data-depth="30">
-      <img src="https://images.unsplash.com/photo-1592928300995-23a24a7df97d?auto=format&fit=crop&w=800&q=60" alt="田间影像">
-      <h3>田间影像</h3>
-      <p>AI 摄像头自动抓拍关键生长阶段。</p>
-    </div>
-    <div class="fg-item card fade" data-depth="60">
-      <img src="https://images.unsplash.com/photo-1606788075765-0b5f1f8d7030?auto=format&fit=crop&w=800&q=60" alt="运输地图">
-      <h3>运输地图</h3>
-      <p>实时轨迹与车辆数据同步显示。</p>
-    </div>
-    <div class="fg-item card fade" data-depth="20">
-      <img src="https://images.unsplash.com/photo-1581091012184-d7f55f6f4854?auto=format&fit=crop&w=800&q=60" alt="AI 诊断">
-      <h3>AI 诊断</h3>
-      <p>作物健康与病害风险分析。</p>
-    </div>
-  </section>
+    <header>
+        <div class="container">
+            <div class="glitch" data-text="AI_INTRO_2024">AI_INTRO_2024</div>
+            <div class="subtitle">INITIALIZING NEURAL NETWORKS... ACCESS GRANTED.</div>
+            <br>
+            <button class="cyber-btn" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
+                ENTER_SYSTEM
+            </button>
+        </div>
+    </header>
 
-  <!-- 数据概览 -->
-  <section>
-    <div class="wrap">
-      <div class="card fade">
-        <h2>实时数据预览</h2>
-        <p>温湿、光照、养分指标可实时更新，支持端到端可视化。</p>
-      </div>
-      <div class="card fade">
-        <h3>土壤湿度</h3>
-        <p>62%</p>
-        <h3>肥料养分</h3>
-        <p>87 / 100</p>
-      </div>
-    </div>
-  </section>
-</main>
+    <section id="projects">
+        <div class="container">
+            <h2>DEPLOYED_MODULES</h2>
+            <div class="card-grid">
+                
+                <div class="cyber-card">
+                    <span class="card-icon">👾</span>
+                    <h3 class="card-title">Auto_Solver.exe</h3>
+                    <p class="card-desc">基于 A* 启发式搜索算法的迷宫自动寻路系统。逻辑即正义。</p>
+                    <div class="status">STATUS: OPTIMIZED</div>
+                </div>
 
-<script>
-// 渐入淡入
-const faders = document.querySelectorAll('.fade');
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){e.target.classList.add('show');observer.unobserve(e.target);}
-  });
-},{threshold:0.2});
-faders.forEach(f=>observer.observe(f));
+                <div class="cyber-card">
+                    <span class="card-icon">👁️</span>
+                    <h3 class="card-title">Vision_Core_v1</h3>
+                    <p class="card-desc">MNIST 卷积神经网络。它能看懂你写的每一个数字，准确率 99.2%。</p>
+                    <div class="status">STATUS: TRAINED</div>
+                </div>
 
-// 前景卡片 3D 微浮动
-const fgItems = document.querySelectorAll('.fg-item');
-document.addEventListener('mousemove',e=>{
-  const cx=window.innerWidth/2,cy=window.innerHeight/2;
-  const mx=(e.clientX-cx)/cx, my=(e.clientY-cy)/cy;
-  fgItems.forEach(f=>{
-    const depth=f.dataset.depth||30;
-    f.style.transform=`translateZ(${depth}px) rotateY(${mx*6}deg) rotateX(${-my*6}deg)`;
-  });
-});
+                <div class="cyber-card">
+                    <span class="card-icon">🧠</span>
+                    <h3 class="card-title">Chat_Bot_Beta</h3>
+                    <p class="card-desc">基于 Transformer 的自然语言处理模型。小心，它可能通过图灵测试。</p>
+                    <div class="status">STATUS: ONLINE</div>
+                </div>
 
-// 简单滚动视差
-const bg = document.querySelector('.bg-layer');
-const glow = document.querySelector('.glow');
-window.addEventListener('scroll',()=>{
-  const y=window.scrollY;
-  bg.style.transform=`translateY(${y*0.2}px)`;
-  glow.style.transform=`translateX(-50%) translateY(${-15+y*0.15}px)`;
-});
-</script>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>SYSTEM_LOGS</h2>
+            <div style="border-left: 2px solid var(--neon-green); padding-left: 20px; margin-left: 10px;">
+                <div style="margin-bottom: 20px;">
+                    <div style="color: var(--neon-pink);">[LOG_001] >> LOADING_KNOWLEDGE</div>
+                    <p style="color: #888;">> Learned: Python, NumPy, Pandas</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="color: var(--neon-pink);">[LOG_002] >> PROCESSING_ALGORITHMS</div>
+                    <p style="color: #888;">> Executed: Linear Regression, K-Means</p>
+                </div>
+                <div>
+                    <div style="color: var(--neon-pink);">[LOG_003] >> DEPLOYING_NETWORKS</div>
+                    <p style="color: #888;">> Built: PyTorch MLP, CNN Models</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 2rem; border-top: 1px solid var(--neon-green); background: black;">
+        <p style="font-size: 0.8rem; color: #555;">END_OF_LINE // © 2024 CYBER_CLASS</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        // 设置全屏
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 黑客帝国字符集
+        const chars = '01010101ABCDEFGHIJKLMNOPQRSTUVWXYZアァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const charArray = chars.split('');
+
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        // 每一列的掉落位置
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function draw() {
+            // 黑色背景，透明度产生拖尾效果
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0'; // 绿色文字
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                // 随机重置回顶部
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+                    drops[i] = 0;
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 33);
+
+        // 窗口大小改变时重置
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
 </html>
