@@ -12,7 +12,7 @@
             --neon-cyan: #0ff;
             --neon-pink: #f0f;
             --bg-color: #050505;
-            --card-bg: rgba(0, 20, 0, 0.85);
+            --module-bg: rgba(0, 10, 0, 0.95); /* 更不透明的模块背景 */
             --border-color: #33ff33;
         }
 
@@ -26,60 +26,83 @@
             line-height: 1.6;
         }
 
-        /* CRT 扫描线特效 - 增加复古显示器质感 */
+        /* CRT 扫描线特效 */
         .scanlines {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15)); /* 扫描线稍微强化 */
             background-size: 100% 4px;
             z-index: 999;
             pointer-events: none;
-            opacity: 0.6;
         }
 
         canvas#matrix {
             position: fixed;
             top: 0; left: 0; z-index: -1;
             width: 100%; height: 100%;
+            opacity: 0.8; /* 整体代码雨透明度降低，更暗 */
         }
 
         /* 滚动条样式 */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-green); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: 3px; }
 
-        /* 导航 */
+        /* 导航栏 - 改变为底部固定导航 */
         nav {
             position: fixed;
-            top: 0; width: 100%;
-            padding: 1rem 2rem;
-            background: rgba(0, 0, 0, 0.9);
-            border-bottom: 1px solid var(--neon-green);
+            bottom: 0; /* 固定在底部 */
+            width: 100%;
+            padding: 0.8rem 1rem; /* 调整内边距 */
+            background: rgba(0, 0, 0, 0.95); /* 更深的背景 */
+            border-top: 1px solid var(--neon-green); /* 顶部边框 */
             z-index: 100;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around; /* 链接均匀分布 */
             align-items: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -5px 15px rgba(0, 255, 0, 0.1); /* 底部阴影 */
         }
-        .logo { 
-            font-size: 1.5rem; 
-            font-weight: bold;
-            text-shadow: 0 0 5px var(--neon-green);
+        .logo { /* 底部导航栏不再显示logo，移动端留给主要内容 */
+            display: none; 
+        }
+        .nav-links {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
         }
         .nav-links a {
-            margin-left: 20px;
-            color: #fff;
+            flex: 1; /* 均分空间 */
+            text-align: center;
+            margin: 0; /* 移除margin-left */
+            color: #ccc;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* 稍微缩小字体 */
             transition: 0.3s;
-            opacity: 0.7;
+            padding: 5px 0;
+            position: relative;
         }
-        .nav-links a:hover { color: var(--neon-cyan); opacity: 1; text-shadow: 0 0 8px var(--neon-cyan); }
+        .nav-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+        .nav-links a.active { /* 当前页面的高亮效果 */
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+        .nav-links a.active::after { /* 下划线指示当前页面 */
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 25%;
+            width: 50%;
+            height: 2px;
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 25px; /* 增加左右内边距 */
         }
 
         /* Header 区域 */
@@ -90,10 +113,11 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding-top: 60px;
+            padding-top: 60px; /* 顶部导航取消后，顶部空间可略微减少 */
+            padding-bottom: 80px; /* 底部导航预留空间 */
         }
 
-        .glitch-wrapper { position: relative; display: inline-block; }
+        .glitch-wrapper { position: relative; display: inline-block; margin-bottom: 10px; }
         .glitch {
             font-size: clamp(2.5rem, 8vw, 5rem);
             font-weight: 900;
@@ -102,26 +126,29 @@
             position: relative;
             text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan);
             animation: glitch-anim 2s infinite linear alternate-reverse;
-            letter-spacing: 5px;
+            letter-spacing: 2px;
+            line-height: 1.2;
         }
 
         .sub-text {
             margin-top: 20px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--neon-cyan);
-            background: rgba(0,0,0,0.6);
-            padding: 5px 15px;
+            background: rgba(0,0,0,0.85); /* 再次加深背景 */
+            padding: 10px 20px;
             border-left: 3px solid var(--neon-cyan);
             max-width: 800px;
+            border-radius: 4px;
+            backdrop-filter: blur(8px); /* 强化模糊效果 */
         }
 
-        .btn-group { margin-top: 3rem; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .btn-group { margin-top: 3rem; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; }
         .cyber-btn {
-            padding: 15px 40px;
-            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid var(--neon-green);
             color: var(--neon-green);
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
@@ -129,16 +156,19 @@
             overflow: hidden;
             font-family: inherit;
             font-weight: bold;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 10px rgba(0,255,0,0.3); /* 按钮默认发光 */
         }
         .cyber-btn:hover {
             background: var(--neon-green);
             color: black;
             box-shadow: 0 0 30px var(--neon-green);
+            transform: scale(1.03); /* 稍微放大 */
         }
-        /* 红色按钮变体 */
         .cyber-btn.alert {
             border-color: var(--neon-pink);
             color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255,0,255,0.3);
         }
         .cyber-btn.alert:hover {
             background: var(--neon-pink);
@@ -147,37 +177,44 @@
         }
 
         /* 通用板块 */
-        section { padding: 80px 0; position: relative; }
+        section { padding: 80px 0; position: relative; } /* 增加上下间距 */
+        
+        /* section-title 优化 */
         .section-title {
             font-size: 2rem;
-            margin-bottom: 60px;
-            border-bottom: 2px solid var(--neon-dark-green);
-            display: inline-block;
-            padding-right: 50px;
+            margin-bottom: 40px;
+            display: block; /* 始终占满一行 */
+            padding-bottom: 5px;
             position: relative;
+            text-align: center;
         }
-        .section-title::after {
-            content: ' // SYSTEM_CHECK';
-            font-size: 1rem;
-            color: #555;
-            position: absolute;
-            right: 0; bottom: 5px;
+        .section-title strong {
+            border-bottom: 2px solid var(--neon-dark-green);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+        .section-title span {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
         }
 
         /* 技能条 */
-        .skill-box { margin-bottom: 20px; }
-        .skill-name { display: flex; justify-content: space-between; margin-bottom: 5px; color: #ccc; }
+        .skill-box { margin-bottom: 25px; }
+        .skill-name { display: flex; justify-content: space-between; margin-bottom: 8px; color: #ccc; font-size: 0.95rem; } /* 字体微调 */
         .progress-bar {
-            height: 12px;
-            background: #111;
-            border: 1px solid #333;
+            height: 10px;
+            background: #222;
+            border: 1px solid #444;
             position: relative;
+            border-radius: 2px;
         }
         .progress-fill {
             height: 100%;
             background: var(--neon-green);
-            width: 0; /* JS控制 */
-            box-shadow: 0 0 10px var(--neon-green);
+            width: 0;
+            box-shadow: 0 0 8px var(--neon-green);
             transition: width 1.5s ease-in-out;
         }
 
@@ -188,60 +225,61 @@
             gap: 30px;
         }
         .card {
-            background: var(--card-bg);
+            background: var(--module-bg); /* 使用统一模块背景变量 */
             border: 1px solid #333;
             padding: 25px;
             position: relative;
             transition: 0.3s;
             overflow: hidden;
+            backdrop-filter: blur(8px); /* 强化毛玻璃效果 */
+            box-shadow: 0 0 15px rgba(0,0,0,0.5); /* 增加卡片阴影 */
         }
         .card:hover {
             border-color: var(--neon-cyan);
             transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
         }
-        .card h3 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 1.4rem; }
-        .card p { color: #aaa; font-size: 0.95rem; margin-bottom: 15px; }
+        .card h3 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 1.35rem; } /* 字体微调 */
+        .card p { color: #bbb; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.7; } /* 字体微调，行距增加 */
         .tags span {
             display: inline-block;
-            font-size: 0.75rem;
+            font-size: 0.75rem; /* 标签字体微调 */
             border: 1px solid var(--neon-pink);
             color: var(--neon-pink);
-            padding: 2px 8px;
+            padding: 2px 7px;
             margin-right: 5px;
             margin-bottom: 5px;
         }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-            transform: translateX(-100%);
-            transition: 0.5s;
-        }
-        .card:hover::before { transform: translateX(100%); }
 
         /* 终端日志风格 */
         .terminal {
-            background: rgba(0,0,0,0.8);
+            background: var(--module-bg); /* 使用统一模块背景变量 */
             border: 1px solid #555;
             padding: 20px;
             font-family: monospace;
-            border-left: 5px solid var(--neon-green);
+            border-left: 4px solid var(--neon-green);
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px); /* 强化毛玻璃效果 */
         }
-        .log-entry { margin-bottom: 10px; color: #ddd; }
-        .log-time { color: var(--neon-green); margin-right: 10px; }
+        .log-entry { margin-bottom: 12px; color: #ddd; word-break: break-all; font-size: 0.95rem; line-height: 1.6; } /* 字体微调，行距增加 */
+        .log-time { color: var(--neon-green); margin-right: 8px; font-size: 0.9rem; }
         .log-cmd { color: var(--neon-cyan); font-weight: bold; }
 
         /* 演化路径 (时间轴) */
-        .timeline { border-left: 2px solid #333; margin-left: 20px; padding-left: 30px; }
+        .timeline { border-left: 2px solid #333; margin-left: 10px; padding-left: 25px; }
         .timeline-item { position: relative; margin-bottom: 40px; }
         .timeline-item::before {
-            content: ''; position: absolute; left: -36px; top: 5px;
+            content: ''; position: absolute; left: -31px; top: 6px;
             width: 10px; height: 10px; background: black;
             border: 2px solid var(--neon-green); border-radius: 50%;
+            z-index: 2;
         }
-        .timeline-date { color: var(--neon-pink); font-size: 0.9rem; margin-bottom: 5px; }
-        .timeline-content h4 { color: white; margin-bottom: 5px; }
-        .timeline-content p { color: #888; font-size: 0.9rem; }
+        .timeline-date { color: var(--neon-pink); font-size: 0.85rem; margin-bottom: 5px; display: block; }
+        .timeline-content h4 { color: white; margin-bottom: 5px; font-size: 1.1rem; }
+        .timeline-content p { color: #999; font-size: 0.9rem; }
 
         /* 页脚 */
         footer {
@@ -251,9 +289,11 @@
             background: #020202;
             font-size: 0.8rem;
             color: #555;
+            margin-top: 40px;
+            padding-bottom: 80px; /* 底部导航栏预留空间 */
         }
 
-        /* 动画关键帧 */
+        /* 动画 */
         @keyframes glitch-anim {
             0% { text-shadow: 2px 2px var(--neon-pink), -2px -2px var(--neon-cyan); }
             25% { text-shadow: -2px 2px var(--neon-pink), 2px -2px var(--neon-cyan); }
@@ -262,10 +302,80 @@
             100% { text-shadow: 1px 1px var(--neon-pink), -1px -1px var(--neon-cyan); }
         }
 
+        /* 移动端核心适配修复 */
         @media (max-width: 768px) {
-            .glitch { font-size: 3rem; }
-            .nav-links { display: none; }
-            .section-title { font-size: 1.5rem; }
+            .glitch { font-size: 2.8rem; }
+            .container { padding: 0 15px; } /* 手机端左右边距 */
+            
+            section { padding: 60px 0 20px; } /* 移动端，板块底部间距减少 */
+            
+            /* section-title 手机端再次优化 */
+            .section-title {
+                margin-bottom: 30px;
+            }
+            .section-title strong {
+                display: block; /* 标题文字换行 */
+                border-bottom: none;
+            }
+            .section-title span {
+                margin-top: 5px;
+                font-size: 0.75rem;
+            }
+            .section-title::after { /* 手机上给标题加一个短的下划线 */
+                content: '';
+                display: block;
+                width: 60px;
+                height: 2px;
+                background: var(--neon-dark-green);
+                margin: 10px auto 0;
+            }
+
+            .btn-group { flex-direction: column; gap: 15px; }
+            .cyber-btn { width: 100%; text-align: center; }
+
+            /* 底部导航栏在桌面端隐藏 */
+            nav { display: flex; } /* 确保在手机端显示 */
+            @media (min-width: 769px) {
+                nav { display: none; } /* 桌面端隐藏底部导航 */
+            }
+        }
+
+        /* 桌面端导航栏 (顶部) */
+        @media (min-width: 769px) {
+            nav { /* 顶部导航栏，桌面端可见 */
+                position: fixed;
+                top: 0;
+                bottom: auto; /* 取消底部固定 */
+                background: rgba(0, 0, 0, 0.9);
+                border-top: none;
+                border-bottom: 1px solid var(--neon-green);
+                padding: 1rem 2rem;
+                display: flex; /* 确保桌面端显示 */
+                justify-content: space-between;
+                align-items: center;
+            }
+            .logo {
+                display: block; /* 桌面端显示logo */
+                font-size: 1.5rem;
+                font-weight: bold;
+                text-shadow: 0 0 5px var(--neon-green);
+                margin-right: auto; /* 将链接推向右侧 */
+            }
+            .nav-links {
+                width: auto;
+                justify-content: flex-end; /* 链接靠右对齐 */
+            }
+            .nav-links a {
+                flex: auto;
+                padding: 0;
+                margin-left: 30px; /* 增加链接间距 */
+                font-size: 0.95rem;
+            }
+            .nav-links a.active::after {
+                bottom: -8px; /* 调整下划线位置 */
+            }
+            header { padding-top: 100px; padding-bottom: 60px; } /* 桌面端预留顶部导航空间 */
+            footer { padding-bottom: 3rem; } /* 桌面端底部不再需要导航预留空间 */
         }
     </style>
 </head>
@@ -274,9 +384,10 @@
     <canvas id="matrix"></canvas>
     <div class="scanlines"></div>
 
-    <nav>
+    <nav class="desktop-nav">
         <div class="logo">&lt;AI_导论 /&gt;</div>
         <div class="nav-links">
+            <a href="#about" class="active">终端日志</a>
             <a href="#skills">能力图谱</a>
             <a href="#projects">核心交付</a>
             <a href="#timeline">演化路径</a>
@@ -285,14 +396,14 @@
 
     <header>
         <div class="container">
-            <div style="font-size: 1.2rem; color: var(--neon-green); margin-bottom: 10px; letter-spacing: 3px;">
+            <div style="font-size: 1rem; color: var(--neon-green); margin-bottom: 15px; letter-spacing: 2px;">
                 SYSTEM: ONLINE // 2024_FALL
             </div>
             <div class="glitch-wrapper">
                 <div class="glitch" data-text="人工智能">人工智能</div>
             </div>
             <div class="glitch-wrapper">
-                <div class="glitch" data-text="结课档案" style="color: var(--neon-cyan); font-size: clamp(2rem, 6vw, 4rem);">结课档案</div>
+                <div class="glitch" data-text="结课档案" style="color: var(--neon-cyan); font-size: clamp(2rem, 6vw, 3.5rem);">结课档案</div>
             </div>
             
             <div class="sub-text">
@@ -302,14 +413,17 @@
 
             <div class="btn-group">
                 <a href="#projects" class="cyber-btn">查看实战成果</a>
-                <a href="https://github.com/" target="_blank" class="cyber-btn alert">访问源代码库</a>
+                <a href="https://github.com/" target="_blank" class="cyber-btn alert">源代码库 (GitHub)</a>
             </div>
         </div>
     </header>
 
     <section id="about">
         <div class="container">
-            <h2 class="section-title">终端日志</h2>
+            <h2 class="section-title">
+                <strong>终端日志</strong>
+                <span>// SYSTEM_CHECK</span>
+            </h2>
             <div class="terminal">
                 <div class="log-entry">
                     <span class="log-time">[10:24:01]</span> <span class="log-cmd">whoami</span>
@@ -331,7 +445,10 @@
 
     <section id="skills">
         <div class="container">
-            <h2 class="section-title">算力 / 技术栈</h2>
+            <h2 class="section-title">
+                <strong>算力 / 技术栈</strong>
+                <span>// SKILL_MATRIX</span>
+            </h2>
             <div class="grid">
                 <div>
                     <div class="skill-box">
@@ -346,11 +463,11 @@
                 <div>
                     <div class="skill-box">
                         <div class="skill-name"><span>Deep Learning (PyTorch)</span> <span>65%</span></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 65%; background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink);"></div></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 65%; background: var(--neon-pink); box-shadow: 0 0 8px var(--neon-pink);"></div></div>
                     </div>
                     <div class="skill-box">
                         <div class="skill-name"><span>LLM / Prompt Engineering</span> <span>70%</span></div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 70%; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);"></div></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 70%; background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan);"></div></div>
                     </div>
                 </div>
             </div>
@@ -359,7 +476,10 @@
 
     <section id="projects">
         <div class="container">
-            <h2 class="section-title">核心交付物</h2>
+            <h2 class="section-title">
+                <strong>核心交付物</strong>
+                <span>// PROJECTS</span>
+            </h2>
             <div class="grid">
                 <div class="card">
                     <h3>01 // 迷宫博弈智能体</h3>
@@ -395,7 +515,10 @@
 
     <section id="timeline">
         <div class="container">
-            <h2 class="section-title">演化路径</h2>
+            <h2 class="section-title">
+                <strong>演化路径</strong>
+                <span>// TIMELINE</span>
+            </h2>
             <div class="timeline">
                 <div class="timeline-item">
                     <div class="timeline-date">PHASE 01. 初始引导</div>
@@ -436,6 +559,15 @@
         </div>
     </footer>
 
+    <nav class="mobile-nav">
+        <div class="nav-links">
+            <a href="#about" class="active">日志</a>
+            <a href="#skills">技能</a>
+            <a href="#projects">项目</a>
+            <a href="#timeline">路径</a>
+        </div>
+    </nav>
+
     <script>
         // 矩阵代码雨
         const canvas = document.getElementById('matrix');
@@ -453,7 +585,7 @@
         for(let x = 0; x < columns; x++) { drops[x] = 1; }
 
         function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // 再次加深背景覆盖，代码雨更弱
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0F0'; 
             ctx.font = fontSize + 'px monospace';
@@ -468,23 +600,53 @@
         setInterval(draw, 33);
         window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 
-        // 简单的页面入场动画
+        // 简单的页面入场动画和导航高亮
         document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.card');
-            const observer = new IntersectionObserver(entries => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5 // 当50%的section可见时触发
+            };
+
+            const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if(entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                        // 触发卡片动画
+                        const cards = entry.target.querySelectorAll('.card');
+                        cards.forEach(card => {
+                            card.style.opacity = 1;
+                            card.style.transform = 'translateY(0)';
+                        });
+                        // 触发进度条动画
+                        const progressFills = entry.target.querySelectorAll('.progress-fill');
+                        progressFills.forEach(fill => {
+                            const width = fill.style.width;
+                            fill.style.width = '0'; // 重置为0
+                            setTimeout(() => { // 延迟执行，产生动画效果
+                                fill.style.width = width;
+                            }, 100);
+                        });
                     }
                 });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
             });
-            cards.forEach(card => {
-                card.style.opacity = 0;
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'all 0.6s ease';
-                observer.observe(card);
-            });
+
+            // 初始加载时，激活第一个导航链接
+            if (sections.length > 0) {
+                navLinks[0].classList.add('active');
+            }
         });
     </script>
 </body>
